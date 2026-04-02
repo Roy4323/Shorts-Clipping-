@@ -189,9 +189,14 @@
       <div class="clips-section">
         <div class="clips-header" style="display: flex; justify-content: space-between; align-items: center;">
           <div class="panel-label" style="border-bottom: none; padding: 0;">🎬 Generated Shorts <span class="seg-count" id="clips-count-label"></span></div>
-          <button class="btn-primary btn-sm" id="regenerate-btn" onclick="regenerateActiveJob()" style="padding: 0.4rem 1rem; font-size: 0.85rem; display: none;">
-            ➕ Generate More Variations
-          </button>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn-primary btn-sm" id="rereframe-btn" onclick="rereframeActiveJob()" style="padding: 0.4rem 1rem; font-size: 0.85rem; display: none; background: var(--accent, #e67e22);">
+              🔄 Re-Reframe + Subtitles
+            </button>
+            <button class="btn-primary btn-sm" id="regenerate-btn" onclick="regenerateActiveJob()" style="padding: 0.4rem 1rem; font-size: 0.85rem; display: none;">
+              ➕ Generate More Variations
+            </button>
+          </div>
         </div>
 
         <div id="detail-progress" class="hidden" style="margin: 0; background: var(--surface2); padding: 1.2rem; border-bottom: 1px solid var(--border);">

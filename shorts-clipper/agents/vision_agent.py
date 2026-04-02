@@ -10,7 +10,7 @@ from api.models import Region
 from config import settings
 from utils.logger import logger
 
-# Bounding box detection prompt for Gemini 2.0 Flash
+# Bounding box detection prompt (shared across providers)
 _DETECTION_PROMPT = """
 Analyze this video frame and detect specialized regions for vertical (9:16) reframing.
 Return JSON ONLY with a list called 'regions'.
@@ -101,10 +101,71 @@ def _parse_regions(raw_text: str) -> list[Region]:
     return regions
 
 
-def _detect_regions_from_frame(frame_path: Path) -> list[Region]:
-    with open(frame_path, "rb") as file:
-        image_data = base64.b64encode(file.read()).decode("utf-8")
+# ── Provider-specific detection ──────────────────────────────────────────────
 
+
+def _detect_via_openai(image_data: str, frame_name: str) -> list[Region]:
+    """Call OpenAI Vision API (gpt-4o-mini) with base64 image."""
+    payload = {
+        "model": settings.openai_model,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": _DETECTION_PROMPT},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{image_data}",
+                            "detail": "low",
+                        },
+                    },
+                ],
+            }
+        ],
+        "max_tokens": 1024,
+        "temperature": 0.1,
+        "response_format": {"type": "json_object"},
+    }
+
+    url = "https://api.openai.com/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {settings.openai_api_key}",
+        "Content-Type": "application/json",
+    }
+
+    last_error: Exception | None = None
+    with httpx.Client(timeout=30.0) as client:
+        for attempt in range(1, _MAX_RETRIES + 1):
+            try:
+                response = client.post(url, json=payload, headers=headers)
+                response.raise_for_status()
+                data = response.json()
+                raw_text = data["choices"][0]["message"]["content"]
+                return _parse_regions(raw_text)
+            except httpx.HTTPStatusError as exc:
+                last_error = exc
+                if exc.response.status_code != 429:
+                    raise
+                if attempt == _MAX_RETRIES:
+                    raise
+                sleep_for = _RATE_LIMIT_BACKOFF_SEC * (2 ** (attempt - 1))
+                logger.warning(
+                    f"[VISION] OpenAI rate limited for {frame_name}; "
+                    f"retry {attempt}/{_MAX_RETRIES} in {sleep_for:.1f}s."
+                )
+                time.sleep(sleep_for)
+            except Exception as exc:
+                last_error = exc
+                raise
+
+    if last_error is not None:
+        raise last_error
+    return []
+
+
+def _detect_via_gemini(image_data: str, frame_name: str) -> list[Region]:
+    """Call Gemini Vision API with base64 image."""
     payload = {
         "contents": [
             {
@@ -136,11 +197,13 @@ def _detect_regions_from_frame(frame_path: Path) -> list[Region]:
                 return _parse_regions(raw_text)
             except httpx.HTTPStatusError as exc:
                 last_error = exc
-                if exc.response.status_code != 429 or attempt == _MAX_RETRIES:
+                if exc.response.status_code != 429:
                     raise
-                sleep_for = _RATE_LIMIT_BACKOFF_SEC * attempt
+                if attempt == _MAX_RETRIES:
+                    raise
+                sleep_for = _RATE_LIMIT_BACKOFF_SEC * (2 ** (attempt - 1))
                 logger.warning(
-                    f"[VISION] Gemini rate limited for {frame_path.name}; "
+                    f"[VISION] Gemini rate limited for {frame_name}; "
                     f"retry {attempt}/{_MAX_RETRIES} in {sleep_for:.1f}s."
                 )
                 time.sleep(sleep_for)
@@ -150,6 +213,37 @@ def _detect_regions_from_frame(frame_path: Path) -> list[Region]:
 
     if last_error is not None:
         raise last_error
+    return []
+
+
+# ── Unified detection with provider selection ────────────────────────────────
+
+
+def _detect_regions_from_frame(frame_path: Path) -> list[Region]:
+    """Detect regions using the configured LLM provider (prefers OpenAI)."""
+    with open(frame_path, "rb") as file:
+        image_data = base64.b64encode(file.read()).decode("utf-8")
+
+    provider = settings.llm_provider  # "auto", "openai", or "gemini"
+
+    if provider == "openai" and settings.openai_api_key:
+        logger.debug(f"[VISION] Using OpenAI for {frame_path.name}")
+        return _detect_via_openai(image_data, frame_path.name)
+
+    if provider == "gemini" and settings.gemini_api_key:
+        logger.debug(f"[VISION] Using Gemini for {frame_path.name}")
+        return _detect_via_gemini(image_data, frame_path.name)
+
+    # Auto mode: prefer OpenAI, fall back to Gemini
+    if settings.openai_api_key:
+        logger.debug(f"[VISION] Auto-selected OpenAI for {frame_path.name}")
+        return _detect_via_openai(image_data, frame_path.name)
+
+    if settings.gemini_api_key:
+        logger.debug(f"[VISION] Auto-selected Gemini for {frame_path.name}")
+        return _detect_via_gemini(image_data, frame_path.name)
+
+    logger.warning("[VISION] No vision API key available.")
     return []
 
 
@@ -181,9 +275,16 @@ def _region_selection_score(regions: list[Region]) -> tuple[int, int, int]:
 
 def detect_regions(video_path: str) -> list[Region]:
     """Sample multiple frames and keep the most layout-informative one."""
-    if not settings.gemini_api_key:
-        logger.warning("[VISION] No Gemini API key - skipping region detection.")
+    if not settings.openai_api_key and not settings.gemini_api_key:
+        logger.warning("[VISION] No API key (OpenAI or Gemini) - skipping region detection.")
         return []
+
+    provider = settings.llm_provider
+    if provider == "auto":
+        active = "OpenAI" if settings.openai_api_key else "Gemini"
+    else:
+        active = provider.capitalize()
+    logger.info(f"[VISION] Using {active} for region detection.")
 
     sample_dir = Path(video_path).parent / f"{Path(video_path).stem}_vision_samples"
     sampled_frames = extract_sample_frames(video_path, sample_dir)
@@ -199,13 +300,13 @@ def detect_regions(video_path: str) -> list[Region]:
             try:
                 regions = _detect_regions_from_frame(frame_path)
             except httpx.HTTPStatusError as exc:
-                logger.error(f"[VISION] Gemini detection failed for {frame_path.name}: {exc}")
+                logger.error(f"[VISION] Detection failed for {frame_path.name}: {exc}")
                 if exc.response.status_code == 429:
-                    logger.warning("[VISION] Stopping further frame analysis because Gemini is rate limiting.")
+                    logger.warning("[VISION] Stopping further frame analysis due to rate limiting.")
                     break
                 continue
             except Exception as exc:
-                logger.error(f"[VISION] Gemini detection failed for {frame_path.name}: {exc}")
+                logger.error(f"[VISION] Detection failed for {frame_path.name}: {exc}")
                 continue
 
             score = _region_selection_score(regions)

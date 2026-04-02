@@ -418,6 +418,11 @@ def _stub_score(transcript: TranscriptResult, video_duration: float, shorts_coun
             start, end = raw_start, raw_end
             duration   = end - start
 
+        # Clamp oversized windows instead of discarding them
+        if duration > MAX_DURATION:
+            end = start + MAX_DURATION
+            duration = MAX_DURATION
+
         if MIN_DURATION <= duration <= MAX_DURATION:
             windows.append({
                 "start":           round(start, 3),
