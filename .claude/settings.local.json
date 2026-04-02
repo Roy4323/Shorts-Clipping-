@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m yt_dlp \"https://www.youtube.com/watch?v=8Y9UTAA4ZTo\" --extractor-args \"youtube:player_client=ios\" -f \"bestvideo[height<=720][ext=mp4]+bestaudio/best[height<=720]\" --merge-output-format mp4 -o \"test_download.mp4\" --no-playlist)"
+    ]
+  }
+}

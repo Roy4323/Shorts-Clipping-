@@ -1,0 +1,10 @@
+data/
+.env
+__pycache__/
+*.pyc
+logs/
+.venv/
+venv/
+env/
+.DS_Store
+cookies.txt

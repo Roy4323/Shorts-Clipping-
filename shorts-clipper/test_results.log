@@ -1,0 +1,325 @@
+2026-04-02 13:55:11,250 - shorts-clipper - INFO - --- [TEST] Stage 1: Metadata & Classification ---
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Program Files\Python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Program Files\Python311\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f50d' in position 50: character maps to <undefined>
+Call stack:
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\tests\test_stages.py", line 86, in <module>
+    meta = test_stage_1()
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\tests\test_stages.py", line 25, in test_stage_1
+    metadata = get_metadata(TEST_URL)
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 67, in get_metadata
+    logger.info(f"\U0001f50d Extracting metadata for {url}...")
+Message: '\U0001f50d Extracting metadata for https://www.youtube.com/watch?v=8Y9UTAA4ZTo...'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Program Files\Python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Program Files\Python311\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f36a' in position 50: character maps to <undefined>
+Call stack:
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\tests\test_stages.py", line 86, in <module>
+    meta = test_stage_1()
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\tests\test_stages.py", line 25, in test_stage_1
+    metadata = get_metadata(TEST_URL)
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 69, in get_metadata
+    info = _extract_info(url, download=False)
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 36, in _extract_info
+    logger.info(f"\U0001f36a Using cookies from: {cookie_path}")
+Message: '\U0001f36a Using cookies from: D:\\data\\Desktop\\Projects\\Shorts-Clipping-\\shorts-clipper\\cookies.txt'
+Arguments: ()
+2026-04-02 13:55:11,323 - shorts-clipper - INFO - [youtube] Extracting URL: https://www.youtube.com/watch?v=8Y9UTAA4ZTo
+2026-04-02 13:55:11,323 - shorts-clipper - INFO - [youtube] 8Y9UTAA4ZTo: Downloading webpage
+2026-04-02 13:55:12,696 - shorts-clipper - INFO - [youtube] 8Y9UTAA4ZTo: Downloading tv downgraded player API JSON
+2026-04-02 13:55:13,069 - shorts-clipper - WARNING - [youtube] 8Y9UTAA4ZTo: n challenge solving failed: Some formats may be missing. Ensure you have a supported JavaScript runtime and challenge solver script distribution installed. Review any warnings presented before this message. For more details, refer to  https://github.com/yt-dlp/yt-dlp/wiki/EJS
+2026-04-02 13:55:13,580 - shorts-clipper - WARNING - Only images are available for download. use --list-formats to see them
+2026-04-02 13:55:14,997 - shorts-clipper - ERROR - ERROR: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats
+2026-04-02 13:55:14,997 - shorts-clipper - ERROR - yt-dlp error for https://www.youtube.com/watch?v=8Y9UTAA4ZTo: ERROR: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1698, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1854, in __extract_info
+    return self.process_ie_result(ie_result, download, extra_info)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1913, in process_ie_result
+    ie_result = self.process_video_result(ie_result, download=download)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 3058, in process_video_result
+    raise ExtractorError(
+yt_dlp.utils.ExtractorError: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 60, in _extract_info
+    return ydl.extract_info(url, download=download)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1687, in extract_info
+    return self.__extract_info(url, self.get_info_extractor(key), download, extra_info, process)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1716, in wrapper
+    self.report_error(str(e), e.format_traceback())
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1154, in report_error
+    self.trouble(f'{self._format_err("ERROR:", self.Styles.ERROR)} {message}', *args, **kwargs)
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1093, in trouble
+    raise DownloadError(message, exc_info)
+yt_dlp.utils.DownloadError: ERROR: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 69, in get_metadata
+    info = _extract_info(url, download=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 63, in _extract_info
+    raise DownloaderError(str(exc)) from exc
+pipeline.downloader.DownloaderError: ERROR: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Program Files\Python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Program Files\Python311\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 53-54: character maps to <undefined>
+Call stack:
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\tests\test_stages.py", line 86, in <module>
+    meta = test_stage_1()
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\tests\test_stages.py", line 25, in test_stage_1
+    metadata = get_metadata(TEST_URL)
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 87, in get_metadata
+    logger.warning(f"\u26a0\ufe0f Metadata extraction failed: {e}. Switching to fallback...")
+Message: '\u26a0\ufe0f Metadata extraction failed: ERROR: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats. Switching to fallback...'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Program Files\Python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Program Files\Python311\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 50: character maps to <undefined>
+Call stack:
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\tests\test_stages.py", line 86, in <module>
+    meta = test_stage_1()
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\tests\test_stages.py", line 25, in test_stage_1
+    metadata = get_metadata(TEST_URL)
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 105, in get_metadata
+    logger.info(f"\u2705 Metadata handled: {metadata.title}")
+Message: '\u2705 Metadata handled: Video 8Y9UTAA4ZTo'
+Arguments: ()
+2026-04-02 13:55:15,000 - shorts-clipper - INFO - Metadata fetch: SUCCESS (Title: Video 8Y9UTAA4ZTo)
+2026-04-02 13:55:16,543 - shorts-clipper - INFO - Classification: SUCCESS (Type: mute_broll, Source: heuristic)
+2026-04-02 13:55:16,543 - shorts-clipper - INFO - Stage 1 Total Time: 5.29 seconds
+2026-04-02 13:55:16,543 - shorts-clipper - INFO - --- [TEST] Stage 2: Parallel Download & Transcript ---
+2026-04-02 13:55:16,543 - shorts-clipper - INFO - Submitting parallel download and transcript tasks...
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Program Files\Python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Program Files\Python311\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f4e5' in position 50: character maps to <undefined>
+Call stack:
+  File "C:\Program Files\Python311\Lib\threading.py", line 995, in _bootstrap
+    self._bootstrap_inner()
+  File "C:\Program Files\Python311\Lib\threading.py", line 1038, in _bootstrap_inner
+    self.run()
+  File "C:\Program Files\Python311\Lib\threading.py", line 975, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Program Files\Python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "C:\Program Files\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 162, in download_video
+    logger.info(f"\U0001f4e5 Starting video download: {url}")
+Message: '\U0001f4e5 Starting video download: https://www.youtube.com/watch?v=8Y9UTAA4ZTo'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Program Files\Python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Program Files\Python311\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f310' in position 50: character maps to <undefined>
+Call stack:
+  File "C:\Program Files\Python311\Lib\threading.py", line 995, in _bootstrap
+    self._bootstrap_inner()
+  File "C:\Program Files\Python311\Lib\threading.py", line 1038, in _bootstrap_inner
+    self.run()
+  File "C:\Program Files\Python311\Lib\threading.py", line 975, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Program Files\Python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "C:\Program Files\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\transcript.py", line 59, in fetch_transcript
+    logger.info(f"\U0001f310 Fetching transcript for {url}")
+Message: '\U0001f310 Fetching transcript for https://www.youtube.com/watch?v=8Y9UTAA4ZTo'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Program Files\Python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Program Files\Python311\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f36a' in position 50: character maps to <undefined>
+Call stack:
+  File "C:\Program Files\Python311\Lib\threading.py", line 995, in _bootstrap
+    self._bootstrap_inner()
+  File "C:\Program Files\Python311\Lib\threading.py", line 1038, in _bootstrap_inner
+    self.run()
+  File "C:\Program Files\Python311\Lib\threading.py", line 975, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Program Files\Python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "C:\Program Files\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 168, in download_video
+    info = _extract_info(url, download=True, outtmpl=output_template)
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 36, in _extract_info
+    logger.info(f"\U0001f36a Using cookies from: {cookie_path}")
+Message: '\U0001f36a Using cookies from: D:\\data\\Desktop\\Projects\\Shorts-Clipping-\\shorts-clipper\\cookies.txt'
+Arguments: ()
+2026-04-02 13:55:16,570 - shorts-clipper - INFO - [youtube] Extracting URL: https://www.youtube.com/watch?v=8Y9UTAA4ZTo
+2026-04-02 13:55:16,574 - shorts-clipper - INFO - [youtube] 8Y9UTAA4ZTo: Downloading webpage
+2026-04-02 13:55:17,933 - shorts-clipper - INFO - [youtube] 8Y9UTAA4ZTo: Downloading tv downgraded player API JSON
+2026-04-02 13:55:18,403 - shorts-clipper - WARNING - [youtube] 8Y9UTAA4ZTo: n challenge solving failed: Some formats may be missing. Ensure you have a supported JavaScript runtime and challenge solver script distribution installed. Review any warnings presented before this message. For more details, refer to  https://github.com/yt-dlp/yt-dlp/wiki/EJS
+2026-04-02 13:55:18,916 - shorts-clipper - WARNING - Only images are available for download. use --list-formats to see them
+2026-04-02 13:55:18,920 - shorts-clipper - ERROR - ERROR: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats
+2026-04-02 13:55:18,922 - shorts-clipper - ERROR - yt-dlp error for https://www.youtube.com/watch?v=8Y9UTAA4ZTo: ERROR: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1698, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1854, in __extract_info
+    return self.process_ie_result(ie_result, download, extra_info)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1913, in process_ie_result
+    ie_result = self.process_video_result(ie_result, download=download)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 3058, in process_video_result
+    raise ExtractorError(
+yt_dlp.utils.ExtractorError: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 60, in _extract_info
+    return ydl.extract_info(url, download=download)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1687, in extract_info
+    return self.__extract_info(url, self.get_info_extractor(key), download, extra_info, process)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1716, in wrapper
+    self.report_error(str(e), e.format_traceback())
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1154, in report_error
+    self.trouble(f'{self._format_err("ERROR:", self.Styles.ERROR)} {message}', *args, **kwargs)
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1093, in trouble
+    raise DownloadError(message, exc_info)
+yt_dlp.utils.DownloadError: ERROR: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 168, in download_video
+    info = _extract_info(url, download=True, outtmpl=output_template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 63, in _extract_info
+    raise DownloaderError(str(exc)) from exc
+pipeline.downloader.DownloaderError: ERROR: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Program Files\Python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Program Files\Python311\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 53-54: character maps to <undefined>
+Call stack:
+  File "C:\Program Files\Python311\Lib\threading.py", line 995, in _bootstrap
+    self._bootstrap_inner()
+  File "C:\Program Files\Python311\Lib\threading.py", line 1038, in _bootstrap_inner
+    self.run()
+  File "C:\Program Files\Python311\Lib\threading.py", line 975, in run
+    self._target(*self._args, **self._kwargs)
+  File "C:\Program Files\Python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "C:\Program Files\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 195, in download_video
+    logger.warning(f"\u26a0\ufe0f Primary download (yt-dlp) failed: {exc}")
+Message: '\u26a0\ufe0f Primary download (yt-dlp) failed: ERROR: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats'
+Arguments: ()
+2026-04-02 13:55:20,815 - shorts-clipper - WARNING - No transcription segments returned for https://www.youtube.com/watch?v=8Y9UTAA4ZTo, using mock fallback.
+2026-04-02 13:55:20,815 - shorts-clipper - INFO - Transcript fetch: SUCCESS (Source: mock, Segments: 1)
+Traceback (most recent call last):
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1698, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1854, in __extract_info
+    return self.process_ie_result(ie_result, download, extra_info)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1913, in process_ie_result
+    ie_result = self.process_video_result(ie_result, download=download)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 3058, in process_video_result
+    raise ExtractorError(
+yt_dlp.utils.ExtractorError: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 60, in _extract_info
+    return ydl.extract_info(url, download=download)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1687, in extract_info
+    return self.__extract_info(url, self.get_info_extractor(key), download, extra_info, process)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1716, in wrapper
+    self.report_error(str(e), e.format_traceback())
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1154, in report_error
+    self.trouble(f'{self._format_err("ERROR:", self.Styles.ERROR)} {message}', *args, **kwargs)
+  File "C:\Users\Promo\AppData\Roaming\Python\Python311\site-packages\yt_dlp\YoutubeDL.py", line 1093, in trouble
+    raise DownloadError(message, exc_info)
+yt_dlp.utils.DownloadError: ERROR: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\tests\test_stages.py", line 88, in <module>
+    test_stage_2(meta)
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\tests\test_stages.py", line 59, in test_stage_2
+    video_path = download_future.result()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\concurrent\futures\_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Program Files\Python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 168, in download_video
+    info = _extract_info(url, download=True, outtmpl=output_template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\data\Desktop\Projects\Shorts-Clipping-\shorts-clipper\pipeline\downloader.py", line 63, in _extract_info
+    raise DownloaderError(str(exc)) from exc
+pipeline.downloader.DownloaderError: ERROR: [youtube] 8Y9UTAA4ZTo: Requested format is not available. Use --list-formats for a list of available formats

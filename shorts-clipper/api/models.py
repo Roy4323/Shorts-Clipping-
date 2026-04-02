@@ -49,7 +49,7 @@ class VideoMetadata(BaseModel):
 
 class ClassificationResult(BaseModel):
     content_type: ContentType
-    source: Literal["anthropic", "heuristic"]
+    source: Literal["openai", "gemini", "heuristic"]
     reason: str
 
 
@@ -60,20 +60,32 @@ class TranscriptSegment(BaseModel):
 
 
 class TranscriptResult(BaseModel):
-    source: Literal["supadata", "mock"]
+    source: Literal["supadata", "cache", "mock"]
     segments: list[TranscriptSegment] = Field(default_factory=list)
 
 
 class StageTwoArtifacts(BaseModel):
     video_path: str | None = None
+    audio_path: str | None = None
     transcript_path: str | None = None
+
+
+class ScoredWindow(BaseModel):
+    start: float
+    end: float
+    score: float
 
 
 class ClipResult(BaseModel):
     clip_number: int = Field(..., ge=1)
     start_sec: float = Field(..., ge=0)
     end_sec: float = Field(..., gt=0)
+    score: float = Field(default=0.0)
     download_url: str
+    # Multi-signal scorer enrichment (empty string when stub scoring was used)
+    hook: str = Field(default="")
+    engagement_type: str = Field(default="")
+    reason: str = Field(default="")
 
 
 class JobStatus(BaseModel):
@@ -87,8 +99,10 @@ class JobStatus(BaseModel):
     classification: ClassificationResult | None = None
     transcript: TranscriptResult | None = None
     artifacts: StageTwoArtifacts | None = None
+    windows: list[ScoredWindow] = Field(default_factory=list)
     clips: list[ClipResult] = Field(default_factory=list)
     error_message: str | None = None
+    scorer_warning: str | None = None
 
 
 class ProcessResponse(BaseModel):

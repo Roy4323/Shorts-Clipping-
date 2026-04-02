@@ -62,5 +62,20 @@ class JobStore:
         self.save(job_id, current)
         return current
 
+    def list_all(self) -> list[dict[str, Any]]:
+        """Return all jobs sorted newest first."""
+        if self._redis is not None:
+            keys = self._redis.keys("shorts:job:*")
+            jobs = []
+            for key in keys:
+                raw = self._redis.get(key)
+                if raw:
+                    jobs.append(json.loads(raw))
+        else:
+            with self._lock:
+                jobs = list(self._memory.values())
+
+        return sorted(jobs, key=lambda j: j.get("created_at", ""), reverse=True)
+
 
 job_store = JobStore()
