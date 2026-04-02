@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>8 Hour Sprint Plan - Shorts Auto Clipping</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+
+  <div class="max-w-5xl mx-auto">
+    <h1 class="text-4xl font-bold mb-6">⚡ 8-Hour Sprint Plan</h1>
+    <h2 class="text-xl text-gray-300 mb-8">Shorts Auto-Clipping Hackathon Execution</h2>
+
+    <!-- Core Principle -->
+    <div class="bg-gray-800 p-6 rounded-2xl mb-6">
+      <h3 class="text-2xl font-semibold mb-3">🧠 Core Principle</h3>
+      <p>Do NOT split work by roles. Split by independent pipeline stages and merge quickly.</p>
+      <p class="mt-2 text-gray-400">Goal: Working demo &gt; perfect system</p>
+    </div>
+
+    <!-- Phase 0 -->
+    <div class="bg-gray-800 p-6 rounded-2xl mb-6">
+      <h3 class="text-2xl font-semibold mb-3">🕐 Phase 0 (0 - 0.5 hr)</h3>
+      <ul class="list-disc ml-6">
+        <li>Lock scope: YouTube URL → 1-2 clips</li>
+        <li>Remove heavy components (diarization, embeddings)</li>
+        <li>Define final output format</li>
+      </ul>
+    </div>
+
+    <!-- Phase 1 -->
+    <div class="bg-gray-800 p-6 rounded-2xl mb-6">
+      <h3 class="text-2xl font-semibold mb-3">🚀 Phase 1 (0.5 - 2.5 hrs)</h3>
+
+      <div class="grid grid-cols-2 gap-6">
+        <div>
+          <h4 class="font-bold mb-2">Track A - Video Pipeline</h4>
+          <ul class="list-disc ml-6 text-gray-300">
+            <li>yt-dlp download (720p)</li>
+            <li>ffmpeg clip extraction</li>
+            <li>Test with hardcoded timestamps</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-bold mb-2">Track B - Transcript + Scoring</h4>
+          <ul class="list-disc ml-6 text-gray-300">
+            <li>Fetch transcript</li>
+            <li>Basic LLM scoring</li>
+            <li>Return top 2 timestamps</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="mt-4 text-green-400">✅ Checkpoint: Generate clips from timestamps</p>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="bg-gray-800 p-6 rounded-2xl mb-6">
+      <h3 class="text-2xl font-semibold mb-3">🚀 Phase 2 (2.5 - 5 hrs)</h3>
+
+      <div class="grid grid-cols-2 gap-6">
+        <div>
+          <h4 class="font-bold mb-2">Track A - Reframing</h4>
+          <ul class="list-disc ml-6 text-gray-300">
+            <li>Center crop (baseline)</li>
+            <li>Face tracking (optional)</li>
+            <li>Vertical video output</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-bold mb-2">Track B - Smarter Scoring</h4>
+          <ul class="list-disc ml-6 text-gray-300">
+            <li>Add audio energy scoring</li>
+            <li>Combine with semantic score</li>
+            <li>Improve clip quality</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="mt-4 text-green-400">✅ Checkpoint: End-to-end smart pipeline working</p>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="bg-gray-800 p-6 rounded-2xl mb-6">
+      <h3 class="text-2xl font-semibold mb-3">🚀 Phase 3 (5 - 7 hrs)</h3>
+
+      <div class="grid grid-cols-2 gap-6">
+        <div>
+          <h4 class="font-bold mb-2">Track A - Subtitles</h4>
+          <ul class="list-disc ml-6 text-gray-300">
+            <li>Generate SRT</li>
+            <li>Burn subtitles using ffmpeg</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-bold mb-2">Track B - AI Agent Layer</h4>
+          <ul class="list-disc ml-6 text-gray-300">
+            <li>Add reasoning for clips</li>
+            <li>Return structured output</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="mt-4 text-green-400">✅ Checkpoint: Clips + subtitles + reasoning</p>
+    </div>
+
+    <!-- Final Phase -->
+    <div class="bg-gray-800 p-6 rounded-2xl mb-6">
+      <h3 class="text-2xl font-semibold mb-3">🏁 Final Phase (7 - 8 hrs)</h3>
+      <ul class="list-disc ml-6 text-gray-300">
+        <li>Return only best clip</li>
+        <li>Add title, duration, reasoning</li>
+        <li>Test full flow</li>
+      </ul>
+    </div>
+
+    <!-- Skip Section -->
+    <div class="bg-red-900 p-6 rounded-2xl mb-6">
+      <h3 class="text-2xl font-semibold mb-3">❌ Avoid These</h3>
+      <ul class="list-disc ml-6">
+        <li>Speaker diarization</li>
+        <li>Optical flow tracking</li>
+        <li>Sentence embeddings</li>
+        <li>Async infra (Celery)</li>
+      </ul>
+    </div>
+
+    <!-- Pitch -->
+    <div class="bg-green-900 p-6 rounded-2xl">
+      <h3 class="text-2xl font-semibold mb-3">🎤 Demo Pitch Line</h3>
+      <p>We built a cost-efficient AI pipeline that uses semantic understanding and audio signals to detect high-engagement moments, avoiding expensive video AI APIs.</p>
+    </div>
+
+  </div>
+
+</body>
+</html>
