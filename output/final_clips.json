@@ -1,0 +1,47 @@
+{
+  "content_type": "motivational_speech",
+  "duration_mode": "0-10",
+  "target_duration_sec": 10,
+  "weights_used": {
+    "semantic": 0.5,
+    "energy": 0.35,
+    "dialogue": 0.15
+  },
+  "total_clips": 2,
+  "clips": [
+    {
+      "rank": 1,
+      "highlight_start": "03:42",
+      "highlight_end": "04:40",
+      "clip_start_sec": 224.0,
+      "clip_end_sec": 234.0,
+      "clip_start_time": "03:44",
+      "clip_end_time": "03:54",
+      "clip_duration_sec": 10.0,
+      "composite_score": 0.7147,
+      "semantic_score": 0.85,
+      "energy_score": 0.3991,
+      "dialogue_score": 1.0,
+      "hook": "You are not alone in this journey!",
+      "engagement_type": "inspiration|emotion",
+      "reason": "This segment reassures learners that they are not alone in their struggles, creating an emotional connection. The motivational tone and supportive message make it a compelling clip for viewers seeking encouragement."
+    },
+    {
+      "rank": 2,
+      "highlight_start": "04:45",
+      "highlight_end": "05:01",
+      "clip_start_sec": 285,
+      "clip_end_sec": 295,
+      "clip_start_time": "04:45",
+      "clip_end_time": "04:55",
+      "clip_duration_sec": 10,
+      "composite_score": 0.651,
+      "semantic_score": 0.9,
+      "energy_score": 0.5743,
+      "dialogue_score": 0.0,
+      "hook": "You are doing amazing!",
+      "engagement_type": "inspiration|emotion",
+      "reason": "This segment provides a motivational boost to learners, emphasizing that making mistakes is part of the learning process. The emotional appeal and encouragement resonate well with viewers, making it a strong standalone clip."
+    }
+  ]
+}

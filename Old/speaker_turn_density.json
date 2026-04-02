@@ -1,0 +1,259 @@
+{
+  "windows": [
+    {
+      "window_index": 0,
+      "start_seconds": 0,
+      "end_seconds": 30,
+      "start_time": "00:00",
+      "end_time": "00:30",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 1,
+      "start_seconds": 30,
+      "end_seconds": 60,
+      "start_time": "00:30",
+      "end_time": "01:00",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 2,
+      "start_seconds": 60,
+      "end_seconds": 90,
+      "start_time": "01:00",
+      "end_time": "01:30",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 3,
+      "start_seconds": 90,
+      "end_seconds": 120,
+      "start_time": "01:30",
+      "end_time": "02:00",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 4,
+      "start_seconds": 120,
+      "end_seconds": 150,
+      "start_time": "02:00",
+      "end_time": "02:30",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 5,
+      "start_seconds": 150,
+      "end_seconds": 180,
+      "start_time": "02:30",
+      "end_time": "03:00",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 6,
+      "start_seconds": 180,
+      "end_seconds": 210,
+      "start_time": "03:00",
+      "end_time": "03:30",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 7,
+      "start_seconds": 210,
+      "end_seconds": 240,
+      "start_time": "03:30",
+      "end_time": "04:00",
+      "switch_count": 2,
+      "score": 1.0
+    },
+    {
+      "window_index": 8,
+      "start_seconds": 240,
+      "end_seconds": 270,
+      "start_time": "04:00",
+      "end_time": "04:30",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 9,
+      "start_seconds": 270,
+      "end_seconds": 300,
+      "start_time": "04:30",
+      "end_time": "05:00",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 10,
+      "start_seconds": 300,
+      "end_seconds": 330,
+      "start_time": "05:00",
+      "end_time": "05:30",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 11,
+      "start_seconds": 330,
+      "end_seconds": 360,
+      "start_time": "05:30",
+      "end_time": "06:00",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 12,
+      "start_seconds": 360,
+      "end_seconds": 390,
+      "start_time": "06:00",
+      "end_time": "06:30",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 13,
+      "start_seconds": 390,
+      "end_seconds": 420,
+      "start_time": "06:30",
+      "end_time": "07:00",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 14,
+      "start_seconds": 420,
+      "end_seconds": 450,
+      "start_time": "07:00",
+      "end_time": "07:30",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 15,
+      "start_seconds": 450,
+      "end_seconds": 480,
+      "start_time": "07:30",
+      "end_time": "08:00",
+      "switch_count": 2,
+      "score": 1.0
+    },
+    {
+      "window_index": 16,
+      "start_seconds": 480,
+      "end_seconds": 510,
+      "start_time": "08:00",
+      "end_time": "08:30",
+      "switch_count": 2,
+      "score": 1.0
+    },
+    {
+      "window_index": 17,
+      "start_seconds": 510,
+      "end_seconds": 517.5,
+      "start_time": "08:30",
+      "end_time": "08:37",
+      "switch_count": 0,
+      "score": 0.0
+    }
+  ],
+  "top_windows": [
+    {
+      "window_index": 7,
+      "start_seconds": 210,
+      "end_seconds": 240,
+      "start_time": "03:30",
+      "end_time": "04:00",
+      "switch_count": 2,
+      "score": 1.0
+    },
+    {
+      "window_index": 15,
+      "start_seconds": 450,
+      "end_seconds": 480,
+      "start_time": "07:30",
+      "end_time": "08:00",
+      "switch_count": 2,
+      "score": 1.0
+    },
+    {
+      "window_index": 16,
+      "start_seconds": 480,
+      "end_seconds": 510,
+      "start_time": "08:00",
+      "end_time": "08:30",
+      "switch_count": 2,
+      "score": 1.0
+    },
+    {
+      "window_index": 0,
+      "start_seconds": 0,
+      "end_seconds": 30,
+      "start_time": "00:00",
+      "end_time": "00:30",
+      "switch_count": 0,
+      "score": 0.0
+    },
+    {
+      "window_index": 1,
+      "start_seconds": 30,
+      "end_seconds": 60,
+      "start_time": "00:30",
+      "end_time": "01:00",
+      "switch_count": 0,
+      "score": 0.0
+    }
+  ],
+  "switches": [
+    {
+      "time": 217.5,
+      "from_speaker": "SPEAKER_01",
+      "to_speaker": "SPEAKER_02"
+    },
+    {
+      "time": 220.0,
+      "from_speaker": "SPEAKER_02",
+      "to_speaker": "SPEAKER_01"
+    },
+    {
+      "time": 470.0,
+      "from_speaker": "SPEAKER_01",
+      "to_speaker": "SPEAKER_02"
+    },
+    {
+      "time": 472.5,
+      "from_speaker": "SPEAKER_02",
+      "to_speaker": "SPEAKER_01"
+    },
+    {
+      "time": 490.0,
+      "from_speaker": "SPEAKER_01",
+      "to_speaker": "SPEAKER_02"
+    },
+    {
+      "time": 492.5,
+      "from_speaker": "SPEAKER_02",
+      "to_speaker": "SPEAKER_01"
+    }
+  ],
+  "speaker_stats": {
+    "SPEAKER_01": 495.0,
+    "SPEAKER_02": 7.5
+  },
+  "metadata": {
+    "audio_file": "audio_file.wav",
+    "model": "pyannote/segmentation-3.0",
+    "window_seconds": 30,
+    "total_duration_seconds": 517.5,
+    "total_duration_human": "08:37",
+    "num_speakers": 2,
+    "total_segments": 10,
+    "total_switches": 6
+  }
+}

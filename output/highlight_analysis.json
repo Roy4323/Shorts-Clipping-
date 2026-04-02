@@ -1,0 +1,72 @@
+{
+  "highlights": [
+    {
+      "rank": 1,
+      "start_time": "04:45",
+      "end_time": "05:01",
+      "duration_seconds": 16,
+      "score": 0.9,
+      "engagement_type": "inspiration|emotion",
+      "content_type": "motivational_speech",
+      "hook": "You are doing amazing!",
+      "reason": "This segment provides a motivational boost to learners, emphasizing that making mistakes is part of the learning process. The emotional appeal and encouragement resonate well with viewers, making it a strong standalone clip."
+    },
+    {
+      "rank": 2,
+      "start_time": "05:01",
+      "end_time": "05:41",
+      "duration_seconds": 40,
+      "score": 0.92,
+      "engagement_type": "action|insight",
+      "content_type": "educational_tutorial",
+      "hook": "Three easy tips to learn English every day!",
+      "reason": "This section outlines actionable tips for learning English, making it practical and relatable for viewers. The clear structure and simplicity of the advice enhance its shareability and engagement potential."
+    },
+    {
+      "rank": 3,
+      "start_time": "02:49",
+      "end_time": "03:36",
+      "duration_seconds": 47,
+      "score": 0.88,
+      "engagement_type": "insight|humor",
+      "content_type": "educational_tutorial",
+      "hook": "You don't need to study for hours!",
+      "reason": "This clip highlights the importance of small, consistent efforts in learning English, which can be surprising to many. The mention of talking to oneself adds a humorous touch, making it relatable and engaging."
+    },
+    {
+      "rank": 4,
+      "start_time": "03:42",
+      "end_time": "04:40",
+      "duration_seconds": 58,
+      "score": 0.85,
+      "engagement_type": "inspiration|emotion",
+      "content_type": "motivational_speech",
+      "hook": "You are not alone in this journey!",
+      "reason": "This segment reassures learners that they are not alone in their struggles, creating an emotional connection. The motivational tone and supportive message make it a compelling clip for viewers seeking encouragement."
+    },
+    {
+      "rank": 5,
+      "start_time": "06:55",
+      "end_time": "07:45",
+      "duration_seconds": 50,
+      "score": 0.87,
+      "engagement_type": "inspiration|emotion",
+      "content_type": "motivational_speech",
+      "hook": "Be proud of yourself for learning!",
+      "reason": "This part emphasizes self-acceptance and pride in the learning process, which can resonate deeply with viewers. The positive reinforcement and motivational language make it a strong candidate for engagement."
+    }
+  ],
+  "analysis_summary": "The video focuses on encouraging beginner English learners through practical tips and motivational messages. Its tone is supportive and uplifting, making it suitable for viewers seeking to improve their language skills.",
+  "metadata": {
+    "transcript_file": "https://www.youtube.com/watch?v=s2EYIDY8wSM",
+    "total_segments": 166,
+    "total_duration_seconds": 527,
+    "total_duration_human": "08:47",
+    "model": "gpt-4o-mini-2024-07-18",
+    "tokens": {
+      "prompt": 2519,
+      "completion": 672,
+      "total": 3191
+    }
+  }
+}

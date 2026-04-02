@@ -1,0 +1,2334 @@
+{
+    "audio_file": "audio_file.wav",
+    "total_duration_sec": 534.5,
+    "analysis_30s_windows": [
+        {
+            "window_start": 0.0,
+            "window_end": 30.0,
+            "mean_energy_30s": 0.5906804990162929,
+            "peaks_in_window": [
+                {
+                    "start_sec": 6.5,
+                    "end_sec": 7.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5792720317840576
+                },
+                {
+                    "start_sec": 7.0,
+                    "end_sec": 7.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.9095396399497986
+                },
+                {
+                    "start_sec": 7.5,
+                    "end_sec": 8.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8855471611022949
+                },
+                {
+                    "start_sec": 8.5,
+                    "end_sec": 9.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7952398657798767
+                },
+                {
+                    "start_sec": 9.0,
+                    "end_sec": 9.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5859526991844177
+                },
+                {
+                    "start_sec": 9.5,
+                    "end_sec": 10.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.9263651371002197
+                },
+                {
+                    "start_sec": 10.0,
+                    "end_sec": 10.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5758866667747498
+                },
+                {
+                    "start_sec": 12.5,
+                    "end_sec": 13.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5982709527015686
+                },
+                {
+                    "start_sec": 13.5,
+                    "end_sec": 14.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7200807929039001
+                },
+                {
+                    "start_sec": 14.0,
+                    "end_sec": 14.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.9004228115081787
+                },
+                {
+                    "start_sec": 14.5,
+                    "end_sec": 15.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7023428082466125
+                },
+                {
+                    "start_sec": 16.0,
+                    "end_sec": 16.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6445599794387817
+                },
+                {
+                    "start_sec": 16.5,
+                    "end_sec": 17.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5469789505004883
+                },
+                {
+                    "start_sec": 17.0,
+                    "end_sec": 17.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5809090733528137
+                },
+                {
+                    "start_sec": 17.5,
+                    "end_sec": 18.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6643918752670288
+                },
+                {
+                    "start_sec": 18.0,
+                    "end_sec": 18.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7998509407043457
+                },
+                {
+                    "start_sec": 20.0,
+                    "end_sec": 20.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6401610374450684
+                },
+                {
+                    "start_sec": 20.5,
+                    "end_sec": 21.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7797421216964722
+                },
+                {
+                    "start_sec": 21.5,
+                    "end_sec": 22.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6844632625579834
+                },
+                {
+                    "start_sec": 22.0,
+                    "end_sec": 22.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6124178171157837
+                },
+                {
+                    "start_sec": 26.0,
+                    "end_sec": 26.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.564374566078186
+                },
+                {
+                    "start_sec": 26.5,
+                    "end_sec": 27.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6316847801208496
+                },
+                {
+                    "start_sec": 27.0,
+                    "end_sec": 27.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6211958527565002
+                },
+                {
+                    "start_sec": 29.5,
+                    "end_sec": 30.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5973851084709167
+                }
+            ]
+        },
+        {
+            "window_start": 30.0,
+            "window_end": 60.0,
+            "mean_energy_30s": 0.5607883716272175,
+            "peaks_in_window": [
+                {
+                    "start_sec": 30.0,
+                    "end_sec": 30.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6411961317062378
+                },
+                {
+                    "start_sec": 30.5,
+                    "end_sec": 31.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6825147271156311
+                },
+                {
+                    "start_sec": 31.0,
+                    "end_sec": 31.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8047033548355103
+                },
+                {
+                    "start_sec": 33.5,
+                    "end_sec": 34.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7150432467460632
+                },
+                {
+                    "start_sec": 34.0,
+                    "end_sec": 34.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5932912826538086
+                },
+                {
+                    "start_sec": 36.0,
+                    "end_sec": 36.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5743016004562378
+                },
+                {
+                    "start_sec": 39.0,
+                    "end_sec": 39.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6655012369155884
+                },
+                {
+                    "start_sec": 39.5,
+                    "end_sec": 40.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8186703324317932
+                },
+                {
+                    "start_sec": 40.0,
+                    "end_sec": 40.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5468073487281799
+                },
+                {
+                    "start_sec": 45.0,
+                    "end_sec": 45.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6665749549865723
+                },
+                {
+                    "start_sec": 45.5,
+                    "end_sec": 46.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.555462121963501
+                },
+                {
+                    "start_sec": 48.5,
+                    "end_sec": 49.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5634419918060303
+                },
+                {
+                    "start_sec": 49.5,
+                    "end_sec": 50.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 1.0
+                },
+                {
+                    "start_sec": 50.0,
+                    "end_sec": 50.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6208005547523499
+                },
+                {
+                    "start_sec": 52.0,
+                    "end_sec": 52.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7277313470840454
+                },
+                {
+                    "start_sec": 52.5,
+                    "end_sec": 53.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.670867383480072
+                },
+                {
+                    "start_sec": 53.0,
+                    "end_sec": 53.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7920930981636047
+                },
+                {
+                    "start_sec": 53.5,
+                    "end_sec": 54.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5886750817298889
+                },
+                {
+                    "start_sec": 57.0,
+                    "end_sec": 57.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6393178701400757
+                },
+                {
+                    "start_sec": 58.0,
+                    "end_sec": 58.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7383413910865784
+                },
+                {
+                    "start_sec": 58.5,
+                    "end_sec": 59.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6153144240379333
+                }
+            ]
+        },
+        {
+            "window_start": 60.0,
+            "window_end": 90.0,
+            "mean_energy_30s": 0.5225701015895854,
+            "peaks_in_window": [
+                {
+                    "start_sec": 61.0,
+                    "end_sec": 61.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5259764194488525
+                },
+                {
+                    "start_sec": 61.5,
+                    "end_sec": 62.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6028857231140137
+                },
+                {
+                    "start_sec": 63.5,
+                    "end_sec": 64.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5627920031547546
+                },
+                {
+                    "start_sec": 64.0,
+                    "end_sec": 64.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7558147311210632
+                },
+                {
+                    "start_sec": 64.5,
+                    "end_sec": 65.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5334118604660034
+                },
+                {
+                    "start_sec": 65.0,
+                    "end_sec": 65.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5309293866157532
+                },
+                {
+                    "start_sec": 67.0,
+                    "end_sec": 67.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.572020947933197
+                },
+                {
+                    "start_sec": 68.0,
+                    "end_sec": 68.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7377235293388367
+                },
+                {
+                    "start_sec": 70.5,
+                    "end_sec": 71.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6844614148139954
+                },
+                {
+                    "start_sec": 71.5,
+                    "end_sec": 72.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5378617644309998
+                },
+                {
+                    "start_sec": 73.5,
+                    "end_sec": 74.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8210829496383667
+                },
+                {
+                    "start_sec": 74.0,
+                    "end_sec": 74.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5450335144996643
+                },
+                {
+                    "start_sec": 74.5,
+                    "end_sec": 75.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5617959499359131
+                },
+                {
+                    "start_sec": 75.0,
+                    "end_sec": 75.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6773990392684937
+                },
+                {
+                    "start_sec": 77.5,
+                    "end_sec": 78.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6362595558166504
+                },
+                {
+                    "start_sec": 78.0,
+                    "end_sec": 78.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7691798210144043
+                },
+                {
+                    "start_sec": 78.5,
+                    "end_sec": 79.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6144509315490723
+                },
+                {
+                    "start_sec": 82.0,
+                    "end_sec": 82.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6335102319717407
+                },
+                {
+                    "start_sec": 83.0,
+                    "end_sec": 83.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5565687417984009
+                },
+                {
+                    "start_sec": 85.0,
+                    "end_sec": 85.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6849526166915894
+                },
+                {
+                    "start_sec": 85.5,
+                    "end_sec": 86.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5325433611869812
+                },
+                {
+                    "start_sec": 88.5,
+                    "end_sec": 89.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.562215268611908
+                },
+                {
+                    "start_sec": 89.0,
+                    "end_sec": 89.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8615835905075073
+                }
+            ]
+        },
+        {
+            "window_start": 90.0,
+            "window_end": 120.0,
+            "mean_energy_30s": 0.5308013985667899,
+            "peaks_in_window": [
+                {
+                    "start_sec": 90.0,
+                    "end_sec": 90.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.887871503829956
+                },
+                {
+                    "start_sec": 93.5,
+                    "end_sec": 94.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5981307625770569
+                },
+                {
+                    "start_sec": 94.0,
+                    "end_sec": 94.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8045027852058411
+                },
+                {
+                    "start_sec": 96.5,
+                    "end_sec": 97.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7771804332733154
+                },
+                {
+                    "start_sec": 100.0,
+                    "end_sec": 100.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5832440853118896
+                },
+                {
+                    "start_sec": 100.5,
+                    "end_sec": 101.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7683064937591553
+                },
+                {
+                    "start_sec": 101.0,
+                    "end_sec": 101.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8122705817222595
+                },
+                {
+                    "start_sec": 101.5,
+                    "end_sec": 102.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6483352184295654
+                },
+                {
+                    "start_sec": 104.0,
+                    "end_sec": 104.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6941291689872742
+                },
+                {
+                    "start_sec": 107.0,
+                    "end_sec": 107.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8565571904182434
+                },
+                {
+                    "start_sec": 108.0,
+                    "end_sec": 108.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7138680815696716
+                },
+                {
+                    "start_sec": 108.5,
+                    "end_sec": 109.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7182521820068359
+                },
+                {
+                    "start_sec": 114.0,
+                    "end_sec": 114.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7246178388595581
+                },
+                {
+                    "start_sec": 114.5,
+                    "end_sec": 115.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5967124104499817
+                },
+                {
+                    "start_sec": 115.5,
+                    "end_sec": 116.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.7085393071174622
+                },
+                {
+                    "start_sec": 118.5,
+                    "end_sec": 119.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5235452651977539
+                },
+                {
+                    "start_sec": 119.0,
+                    "end_sec": 119.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5846793055534363
+                },
+                {
+                    "start_sec": 119.5,
+                    "end_sec": 120.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5560004115104675
+                }
+            ]
+        },
+        {
+            "window_start": 120.0,
+            "window_end": 150.0,
+            "mean_energy_30s": 0.445518865517709,
+            "peaks_in_window": [
+                {
+                    "start_sec": 120.5,
+                    "end_sec": 121.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5869913101196289
+                },
+                {
+                    "start_sec": 122.5,
+                    "end_sec": 123.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5027379989624023
+                },
+                {
+                    "start_sec": 123.0,
+                    "end_sec": 123.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7332430481910706
+                },
+                {
+                    "start_sec": 123.5,
+                    "end_sec": 124.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.549845814704895
+                },
+                {
+                    "start_sec": 124.5,
+                    "end_sec": 125.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6616113781929016
+                },
+                {
+                    "start_sec": 125.0,
+                    "end_sec": 125.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.580056369304657
+                },
+                {
+                    "start_sec": 125.5,
+                    "end_sec": 126.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7514641284942627
+                },
+                {
+                    "start_sec": 126.0,
+                    "end_sec": 126.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5160735249519348
+                },
+                {
+                    "start_sec": 126.5,
+                    "end_sec": 127.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5456133484840393
+                },
+                {
+                    "start_sec": 128.5,
+                    "end_sec": 129.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.566514253616333
+                },
+                {
+                    "start_sec": 129.0,
+                    "end_sec": 129.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5780467391014099
+                },
+                {
+                    "start_sec": 130.0,
+                    "end_sec": 130.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6396576166152954
+                },
+                {
+                    "start_sec": 134.0,
+                    "end_sec": 134.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5776185989379883
+                },
+                {
+                    "start_sec": 135.5,
+                    "end_sec": 136.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5792849063873291
+                },
+                {
+                    "start_sec": 138.0,
+                    "end_sec": 138.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5533820986747742
+                },
+                {
+                    "start_sec": 138.5,
+                    "end_sec": 139.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6737785935401917
+                },
+                {
+                    "start_sec": 139.0,
+                    "end_sec": 139.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5704889297485352
+                },
+                {
+                    "start_sec": 139.5,
+                    "end_sec": 140.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5127564668655396
+                },
+                {
+                    "start_sec": 140.5,
+                    "end_sec": 141.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6179569363594055
+                },
+                {
+                    "start_sec": 141.0,
+                    "end_sec": 141.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5622877478599548
+                },
+                {
+                    "start_sec": 144.0,
+                    "end_sec": 144.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.540030837059021
+                },
+                {
+                    "start_sec": 144.5,
+                    "end_sec": 145.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.496120810508728
+                },
+                {
+                    "start_sec": 145.0,
+                    "end_sec": 145.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.7545220255851746
+                },
+                {
+                    "start_sec": 149.5,
+                    "end_sec": 150.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6172701716423035
+                }
+            ]
+        },
+        {
+            "window_start": 150.0,
+            "window_end": 180.0,
+            "mean_energy_30s": 0.4222655349305869,
+            "peaks_in_window": [
+                {
+                    "start_sec": 150.0,
+                    "end_sec": 150.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5099722146987915
+                },
+                {
+                    "start_sec": 150.5,
+                    "end_sec": 151.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5290343761444092
+                },
+                {
+                    "start_sec": 151.5,
+                    "end_sec": 152.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.4962286055088043
+                },
+                {
+                    "start_sec": 152.0,
+                    "end_sec": 152.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7410958409309387
+                },
+                {
+                    "start_sec": 155.0,
+                    "end_sec": 155.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6338239312171936
+                },
+                {
+                    "start_sec": 155.5,
+                    "end_sec": 156.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6139469146728516
+                },
+                {
+                    "start_sec": 156.0,
+                    "end_sec": 156.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5851969718933105
+                },
+                {
+                    "start_sec": 158.5,
+                    "end_sec": 159.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.4874229431152344
+                },
+                {
+                    "start_sec": 160.0,
+                    "end_sec": 160.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6149711608886719
+                },
+                {
+                    "start_sec": 163.0,
+                    "end_sec": 163.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5772933959960938
+                },
+                {
+                    "start_sec": 163.5,
+                    "end_sec": 164.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5114736557006836
+                },
+                {
+                    "start_sec": 164.0,
+                    "end_sec": 164.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5155056715011597
+                },
+                {
+                    "start_sec": 164.5,
+                    "end_sec": 165.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5091469287872314
+                },
+                {
+                    "start_sec": 166.5,
+                    "end_sec": 167.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.49407416582107544
+                },
+                {
+                    "start_sec": 170.0,
+                    "end_sec": 170.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.4918116629123688
+                },
+                {
+                    "start_sec": 170.5,
+                    "end_sec": 171.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.49415144324302673
+                },
+                {
+                    "start_sec": 171.5,
+                    "end_sec": 172.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.4992808401584625
+                },
+                {
+                    "start_sec": 174.0,
+                    "end_sec": 174.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.7225415706634521
+                },
+                {
+                    "start_sec": 174.5,
+                    "end_sec": 175.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5925756096839905
+                },
+                {
+                    "start_sec": 175.0,
+                    "end_sec": 175.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6012085676193237
+                },
+                {
+                    "start_sec": 178.0,
+                    "end_sec": 178.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5892084240913391
+                },
+                {
+                    "start_sec": 179.0,
+                    "end_sec": 179.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5676314830780029
+                }
+            ]
+        },
+        {
+            "window_start": 180.0,
+            "window_end": 210.0,
+            "mean_energy_30s": 0.5436433157112922,
+            "peaks_in_window": [
+                {
+                    "start_sec": 180.0,
+                    "end_sec": 180.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5686894059181213
+                },
+                {
+                    "start_sec": 182.5,
+                    "end_sec": 183.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5827717185020447
+                },
+                {
+                    "start_sec": 186.0,
+                    "end_sec": 186.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6057152152061462
+                },
+                {
+                    "start_sec": 187.0,
+                    "end_sec": 187.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5866497755050659
+                },
+                {
+                    "start_sec": 189.0,
+                    "end_sec": 189.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.767713189125061
+                },
+                {
+                    "start_sec": 189.5,
+                    "end_sec": 190.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5764868259429932
+                },
+                {
+                    "start_sec": 192.5,
+                    "end_sec": 193.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5401356816291809
+                },
+                {
+                    "start_sec": 193.5,
+                    "end_sec": 194.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5784687995910645
+                },
+                {
+                    "start_sec": 196.5,
+                    "end_sec": 197.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6004318594932556
+                },
+                {
+                    "start_sec": 202.5,
+                    "end_sec": 203.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6506608724594116
+                },
+                {
+                    "start_sec": 206.5,
+                    "end_sec": 207.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.659027636051178
+                },
+                {
+                    "start_sec": 209.0,
+                    "end_sec": 209.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5484832525253296
+                }
+            ]
+        },
+        {
+            "window_start": 210.0,
+            "window_end": 240.0,
+            "mean_energy_30s": 0.3991235913133371,
+            "peaks_in_window": [
+                {
+                    "start_sec": 211.5,
+                    "end_sec": 212.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5330952405929565
+                },
+                {
+                    "start_sec": 212.0,
+                    "end_sec": 212.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.600161075592041
+                },
+                {
+                    "start_sec": 212.5,
+                    "end_sec": 213.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.47836098074913025
+                },
+                {
+                    "start_sec": 214.5,
+                    "end_sec": 215.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5967004895210266
+                },
+                {
+                    "start_sec": 215.0,
+                    "end_sec": 215.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5539865493774414
+                },
+                {
+                    "start_sec": 217.5,
+                    "end_sec": 218.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6020958423614502
+                },
+                {
+                    "start_sec": 218.0,
+                    "end_sec": 218.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5571732521057129
+                },
+                {
+                    "start_sec": 222.5,
+                    "end_sec": 223.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.4933791160583496
+                },
+                {
+                    "start_sec": 223.5,
+                    "end_sec": 224.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7211019396781921
+                },
+                {
+                    "start_sec": 224.0,
+                    "end_sec": 224.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5324116945266724
+                },
+                {
+                    "start_sec": 224.5,
+                    "end_sec": 225.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.49268829822540283
+                },
+                {
+                    "start_sec": 227.0,
+                    "end_sec": 227.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7824450731277466
+                },
+                {
+                    "start_sec": 227.5,
+                    "end_sec": 228.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7689942717552185
+                },
+                {
+                    "start_sec": 228.0,
+                    "end_sec": 228.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7380756139755249
+                },
+                {
+                    "start_sec": 228.5,
+                    "end_sec": 229.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5697867274284363
+                },
+                {
+                    "start_sec": 229.5,
+                    "end_sec": 230.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5364915728569031
+                },
+                {
+                    "start_sec": 230.0,
+                    "end_sec": 230.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7964532971382141
+                },
+                {
+                    "start_sec": 230.5,
+                    "end_sec": 231.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5328841805458069
+                },
+                {
+                    "start_sec": 232.5,
+                    "end_sec": 233.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6005271673202515
+                },
+                {
+                    "start_sec": 233.0,
+                    "end_sec": 233.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7526555061340332
+                },
+                {
+                    "start_sec": 233.5,
+                    "end_sec": 234.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7382381558418274
+                },
+                {
+                    "start_sec": 236.5,
+                    "end_sec": 237.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7135743498802185
+                },
+                {
+                    "start_sec": 237.0,
+                    "end_sec": 237.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7943554520606995
+                },
+                {
+                    "start_sec": 237.5,
+                    "end_sec": 238.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8026061654090881
+                }
+            ]
+        },
+        {
+            "window_start": 240.0,
+            "window_end": 270.0,
+            "mean_energy_30s": 0.6702469462461824,
+            "peaks_in_window": [
+                {
+                    "start_sec": 240.0,
+                    "end_sec": 240.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6915955543518066
+                },
+                {
+                    "start_sec": 241.0,
+                    "end_sec": 241.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6187050342559814
+                },
+                {
+                    "start_sec": 241.5,
+                    "end_sec": 242.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7117606401443481
+                },
+                {
+                    "start_sec": 242.0,
+                    "end_sec": 242.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.66138756275177
+                },
+                {
+                    "start_sec": 244.5,
+                    "end_sec": 245.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6627897024154663
+                },
+                {
+                    "start_sec": 245.5,
+                    "end_sec": 246.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5886776447296143
+                },
+                {
+                    "start_sec": 249.0,
+                    "end_sec": 249.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8608839511871338
+                },
+                {
+                    "start_sec": 250.5,
+                    "end_sec": 251.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7193105220794678
+                },
+                {
+                    "start_sec": 251.0,
+                    "end_sec": 251.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8248999714851379
+                },
+                {
+                    "start_sec": 254.0,
+                    "end_sec": 254.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6166453957557678
+                },
+                {
+                    "start_sec": 254.5,
+                    "end_sec": 255.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7700640559196472
+                },
+                {
+                    "start_sec": 255.0,
+                    "end_sec": 255.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5853543281555176
+                },
+                {
+                    "start_sec": 255.5,
+                    "end_sec": 256.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6439473628997803
+                },
+                {
+                    "start_sec": 258.5,
+                    "end_sec": 259.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6457768082618713
+                },
+                {
+                    "start_sec": 260.0,
+                    "end_sec": 260.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7641791701316833
+                },
+                {
+                    "start_sec": 263.5,
+                    "end_sec": 264.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6003696322441101
+                },
+                {
+                    "start_sec": 264.5,
+                    "end_sec": 265.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6956411600112915
+                },
+                {
+                    "start_sec": 265.0,
+                    "end_sec": 265.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7443187236785889
+                },
+                {
+                    "start_sec": 266.5,
+                    "end_sec": 267.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5816751718521118
+                },
+                {
+                    "start_sec": 267.0,
+                    "end_sec": 267.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8164821267127991
+                },
+                {
+                    "start_sec": 269.0,
+                    "end_sec": 269.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5823177099227905
+                }
+            ]
+        },
+        {
+            "window_start": 270.0,
+            "window_end": 300.0,
+            "mean_energy_30s": 0.5742824694851394,
+            "peaks_in_window": [
+                {
+                    "start_sec": 271.5,
+                    "end_sec": 272.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7370864748954773
+                },
+                {
+                    "start_sec": 272.0,
+                    "end_sec": 272.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5697210431098938
+                },
+                {
+                    "start_sec": 274.0,
+                    "end_sec": 274.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5543956756591797
+                },
+                {
+                    "start_sec": 274.5,
+                    "end_sec": 275.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6183698773384094
+                },
+                {
+                    "start_sec": 277.0,
+                    "end_sec": 277.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5985984206199646
+                },
+                {
+                    "start_sec": 278.0,
+                    "end_sec": 278.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5877739787101746
+                },
+                {
+                    "start_sec": 278.5,
+                    "end_sec": 279.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.642796516418457
+                },
+                {
+                    "start_sec": 279.5,
+                    "end_sec": 280.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.921890377998352
+                },
+                {
+                    "start_sec": 280.0,
+                    "end_sec": 280.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.649408757686615
+                },
+                {
+                    "start_sec": 283.0,
+                    "end_sec": 283.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.9497048854827881
+                },
+                {
+                    "start_sec": 283.5,
+                    "end_sec": 284.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5393748879432678
+                },
+                {
+                    "start_sec": 284.5,
+                    "end_sec": 285.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6766106486320496
+                },
+                {
+                    "start_sec": 285.0,
+                    "end_sec": 285.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8076853156089783
+                },
+                {
+                    "start_sec": 286.5,
+                    "end_sec": 287.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6206440329551697
+                },
+                {
+                    "start_sec": 287.0,
+                    "end_sec": 287.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6663952469825745
+                },
+                {
+                    "start_sec": 287.5,
+                    "end_sec": 288.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6896219849586487
+                },
+                {
+                    "start_sec": 289.5,
+                    "end_sec": 290.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6478016376495361
+                },
+                {
+                    "start_sec": 291.0,
+                    "end_sec": 291.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5853431224822998
+                },
+                {
+                    "start_sec": 292.5,
+                    "end_sec": 293.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8821425437927246
+                },
+                {
+                    "start_sec": 293.0,
+                    "end_sec": 293.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6641132235527039
+                },
+                {
+                    "start_sec": 298.5,
+                    "end_sec": 299.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5418020486831665
+                },
+                {
+                    "start_sec": 299.0,
+                    "end_sec": 299.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7680583000183105
+                }
+            ]
+        },
+        {
+            "window_start": 300.0,
+            "window_end": 330.0,
+            "mean_energy_30s": 0.32614911833878407,
+            "peaks_in_window": [
+                {
+                    "start_sec": 300.0,
+                    "end_sec": 300.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6948339939117432
+                },
+                {
+                    "start_sec": 300.5,
+                    "end_sec": 301.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8430456519126892
+                },
+                {
+                    "start_sec": 301.0,
+                    "end_sec": 301.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5320136547088623
+                },
+                {
+                    "start_sec": 307.0,
+                    "end_sec": 307.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.589897871017456
+                },
+                {
+                    "start_sec": 307.5,
+                    "end_sec": 308.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6286797523498535
+                },
+                {
+                    "start_sec": 308.0,
+                    "end_sec": 308.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.48625245690345764
+                },
+                {
+                    "start_sec": 308.5,
+                    "end_sec": 309.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5270112752914429
+                },
+                {
+                    "start_sec": 309.0,
+                    "end_sec": 309.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5661751627922058
+                },
+                {
+                    "start_sec": 309.5,
+                    "end_sec": 310.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.4541529417037964
+                },
+                {
+                    "start_sec": 310.0,
+                    "end_sec": 310.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5023200511932373
+                },
+                {
+                    "start_sec": 311.0,
+                    "end_sec": 311.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.47217196226119995
+                },
+                {
+                    "start_sec": 313.0,
+                    "end_sec": 313.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6111224889755249
+                },
+                {
+                    "start_sec": 315.0,
+                    "end_sec": 315.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5825279355049133
+                },
+                {
+                    "start_sec": 315.5,
+                    "end_sec": 316.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.4767470359802246
+                },
+                {
+                    "start_sec": 316.5,
+                    "end_sec": 317.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5210005044937134
+                },
+                {
+                    "start_sec": 322.0,
+                    "end_sec": 322.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.46600261330604553
+                },
+                {
+                    "start_sec": 322.5,
+                    "end_sec": 323.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5299810171127319
+                },
+                {
+                    "start_sec": 323.5,
+                    "end_sec": 324.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.665006160736084
+                },
+                {
+                    "start_sec": 324.0,
+                    "end_sec": 324.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6207094192504883
+                },
+                {
+                    "start_sec": 324.5,
+                    "end_sec": 325.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.48352479934692383
+                },
+                {
+                    "start_sec": 326.5,
+                    "end_sec": 327.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5148202180862427
+                },
+                {
+                    "start_sec": 327.0,
+                    "end_sec": 327.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5524768233299255
+                },
+                {
+                    "start_sec": 327.5,
+                    "end_sec": 328.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5546106100082397
+                },
+                {
+                    "start_sec": 328.0,
+                    "end_sec": 328.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5040670037269592
+                }
+            ]
+        },
+        {
+            "window_start": 330.0,
+            "window_end": 360.0,
+            "mean_energy_30s": 0.4826766248841025,
+            "peaks_in_window": [
+                {
+                    "start_sec": 330.0,
+                    "end_sec": 330.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6817348599433899
+                },
+                {
+                    "start_sec": 330.5,
+                    "end_sec": 331.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6149170994758606
+                },
+                {
+                    "start_sec": 333.0,
+                    "end_sec": 333.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5497525930404663
+                },
+                {
+                    "start_sec": 335.5,
+                    "end_sec": 336.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.583703339099884
+                },
+                {
+                    "start_sec": 336.0,
+                    "end_sec": 336.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.558285653591156
+                },
+                {
+                    "start_sec": 337.5,
+                    "end_sec": 338.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5630069375038147
+                },
+                {
+                    "start_sec": 338.0,
+                    "end_sec": 338.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5496848821640015
+                },
+                {
+                    "start_sec": 340.0,
+                    "end_sec": 340.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5781601667404175
+                },
+                {
+                    "start_sec": 340.5,
+                    "end_sec": 341.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.565184473991394
+                },
+                {
+                    "start_sec": 341.0,
+                    "end_sec": 341.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.514971137046814
+                },
+                {
+                    "start_sec": 341.5,
+                    "end_sec": 342.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.601534903049469
+                },
+                {
+                    "start_sec": 342.0,
+                    "end_sec": 342.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5638092756271362
+                },
+                {
+                    "start_sec": 346.0,
+                    "end_sec": 346.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5233152508735657
+                },
+                {
+                    "start_sec": 349.0,
+                    "end_sec": 349.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5502508282661438
+                },
+                {
+                    "start_sec": 350.0,
+                    "end_sec": 350.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.626010537147522
+                },
+                {
+                    "start_sec": 350.5,
+                    "end_sec": 351.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5087327361106873
+                },
+                {
+                    "start_sec": 351.0,
+                    "end_sec": 351.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.533396303653717
+                },
+                {
+                    "start_sec": 354.0,
+                    "end_sec": 354.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5842939615249634
+                },
+                {
+                    "start_sec": 354.5,
+                    "end_sec": 355.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.613094687461853
+                },
+                {
+                    "start_sec": 356.0,
+                    "end_sec": 356.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.7902523875236511
+                },
+                {
+                    "start_sec": 358.5,
+                    "end_sec": 359.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.7264963388442993
+                },
+                {
+                    "start_sec": 359.0,
+                    "end_sec": 359.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5742325782775879
+                }
+            ]
+        },
+        {
+            "window_start": 360.0,
+            "window_end": 390.0,
+            "mean_energy_30s": 0.4017636625956619,
+            "peaks_in_window": [
+                {
+                    "start_sec": 360.5,
+                    "end_sec": 361.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.505317211151123
+                },
+                {
+                    "start_sec": 362.0,
+                    "end_sec": 362.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5875059366226196
+                },
+                {
+                    "start_sec": 362.5,
+                    "end_sec": 363.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6304607391357422
+                },
+                {
+                    "start_sec": 363.0,
+                    "end_sec": 363.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5020650029182434
+                },
+                {
+                    "start_sec": 365.0,
+                    "end_sec": 365.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.48053449392318726
+                },
+                {
+                    "start_sec": 365.5,
+                    "end_sec": 366.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.7017785310745239
+                },
+                {
+                    "start_sec": 367.0,
+                    "end_sec": 367.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.4919048249721527
+                },
+                {
+                    "start_sec": 369.0,
+                    "end_sec": 369.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.4860568642616272
+                },
+                {
+                    "start_sec": 371.0,
+                    "end_sec": 371.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5729755759239197
+                },
+                {
+                    "start_sec": 373.5,
+                    "end_sec": 374.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.563758909702301
+                },
+                {
+                    "start_sec": 377.0,
+                    "end_sec": 377.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5884986519813538
+                },
+                {
+                    "start_sec": 377.5,
+                    "end_sec": 378.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5233039855957031
+                },
+                {
+                    "start_sec": 379.0,
+                    "end_sec": 379.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.4936563968658447
+                },
+                {
+                    "start_sec": 382.0,
+                    "end_sec": 382.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6474308967590332
+                },
+                {
+                    "start_sec": 382.5,
+                    "end_sec": 383.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5435606837272644
+                },
+                {
+                    "start_sec": 383.0,
+                    "end_sec": 383.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5934987664222717
+                },
+                {
+                    "start_sec": 385.5,
+                    "end_sec": 386.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6752054691314697
+                },
+                {
+                    "start_sec": 386.0,
+                    "end_sec": 386.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.49600690603256226
+                },
+                {
+                    "start_sec": 387.0,
+                    "end_sec": 387.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5779544711112976
+                },
+                {
+                    "start_sec": 387.5,
+                    "end_sec": 388.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5406502485275269
+                },
+                {
+                    "start_sec": 389.5,
+                    "end_sec": 390.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6104938983917236
+                }
+            ]
+        },
+        {
+            "window_start": 390.0,
+            "window_end": 420.0,
+            "mean_energy_30s": 0.23219400915520855,
+            "peaks_in_window": [
+                {
+                    "start_sec": 390.0,
+                    "end_sec": 390.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6841966509819031
+                },
+                {
+                    "start_sec": 390.5,
+                    "end_sec": 391.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5023473501205444
+                },
+                {
+                    "start_sec": 393.0,
+                    "end_sec": 393.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7115016579627991
+                },
+                {
+                    "start_sec": 393.5,
+                    "end_sec": 394.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.488228440284729
+                },
+                {
+                    "start_sec": 394.5,
+                    "end_sec": 395.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.45657482743263245
+                },
+                {
+                    "start_sec": 395.0,
+                    "end_sec": 395.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.4908711016178131
+                },
+                {
+                    "start_sec": 395.5,
+                    "end_sec": 396.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6898736357688904
+                },
+                {
+                    "start_sec": 396.0,
+                    "end_sec": 396.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5399472117424011
+                },
+                {
+                    "start_sec": 400.0,
+                    "end_sec": 400.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6227084994316101
+                },
+                {
+                    "start_sec": 400.5,
+                    "end_sec": 401.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5692902207374573
+                },
+                {
+                    "start_sec": 401.5,
+                    "end_sec": 402.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.560397744178772
+                },
+                {
+                    "start_sec": 404.0,
+                    "end_sec": 404.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6415688991546631
+                },
+                {
+                    "start_sec": 404.5,
+                    "end_sec": 405.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5479942560195923
+                },
+                {
+                    "start_sec": 405.0,
+                    "end_sec": 405.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.43747398257255554
+                },
+                {
+                    "start_sec": 405.5,
+                    "end_sec": 406.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.4733291268348694
+                },
+                {
+                    "start_sec": 406.0,
+                    "end_sec": 406.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.4257229268550873
+                },
+                {
+                    "start_sec": 408.0,
+                    "end_sec": 408.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.519891083240509
+                },
+                {
+                    "start_sec": 408.5,
+                    "end_sec": 409.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.4951114356517792
+                },
+                {
+                    "start_sec": 415.5,
+                    "end_sec": 416.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5623409152030945
+                },
+                {
+                    "start_sec": 416.0,
+                    "end_sec": 416.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.7217255234718323
+                },
+                {
+                    "start_sec": 416.5,
+                    "end_sec": 417.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5303767323493958
+                },
+                {
+                    "start_sec": 418.5,
+                    "end_sec": 419.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5521934628486633
+                },
+                {
+                    "start_sec": 419.0,
+                    "end_sec": 419.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.61969393491745
+                },
+                {
+                    "start_sec": 419.5,
+                    "end_sec": 420.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5358682870864868
+                }
+            ]
+        },
+        {
+            "window_start": 420.0,
+            "window_end": 450.0,
+            "mean_energy_30s": 0.5444475696530403,
+            "peaks_in_window": [
+                {
+                    "start_sec": 422.0,
+                    "end_sec": 422.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.584097683429718
+                },
+                {
+                    "start_sec": 422.5,
+                    "end_sec": 423.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.7042585015296936
+                },
+                {
+                    "start_sec": 423.0,
+                    "end_sec": 423.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6101694107055664
+                },
+                {
+                    "start_sec": 424.0,
+                    "end_sec": 424.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5370848178863525
+                },
+                {
+                    "start_sec": 427.0,
+                    "end_sec": 427.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.611627995967865
+                },
+                {
+                    "start_sec": 429.0,
+                    "end_sec": 429.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6194427609443665
+                },
+                {
+                    "start_sec": 429.5,
+                    "end_sec": 430.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.70494145154953
+                },
+                {
+                    "start_sec": 431.5,
+                    "end_sec": 432.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5322642922401428
+                },
+                {
+                    "start_sec": 433.0,
+                    "end_sec": 433.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5847440361976624
+                },
+                {
+                    "start_sec": 435.0,
+                    "end_sec": 435.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6589910984039307
+                },
+                {
+                    "start_sec": 440.0,
+                    "end_sec": 440.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7328672409057617
+                },
+                {
+                    "start_sec": 440.5,
+                    "end_sec": 441.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5750890970230103
+                },
+                {
+                    "start_sec": 441.0,
+                    "end_sec": 441.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5466588735580444
+                },
+                {
+                    "start_sec": 441.5,
+                    "end_sec": 442.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.582474410533905
+                },
+                {
+                    "start_sec": 443.5,
+                    "end_sec": 444.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5442821383476257
+                },
+                {
+                    "start_sec": 446.0,
+                    "end_sec": 446.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7145039439201355
+                },
+                {
+                    "start_sec": 446.5,
+                    "end_sec": 447.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5316603183746338
+                },
+                {
+                    "start_sec": 447.0,
+                    "end_sec": 447.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5355697870254517
+                },
+                {
+                    "start_sec": 448.5,
+                    "end_sec": 449.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6154580116271973
+                }
+            ]
+        },
+        {
+            "window_start": 450.0,
+            "window_end": 480.0,
+            "mean_energy_30s": 0.46177335926493135,
+            "peaks_in_window": [
+                {
+                    "start_sec": 450.5,
+                    "end_sec": 451.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5994941592216492
+                },
+                {
+                    "start_sec": 452.0,
+                    "end_sec": 452.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5733158588409424
+                },
+                {
+                    "start_sec": 452.5,
+                    "end_sec": 453.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6601672172546387
+                },
+                {
+                    "start_sec": 454.0,
+                    "end_sec": 454.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.680377721786499
+                },
+                {
+                    "start_sec": 454.5,
+                    "end_sec": 455.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5055606365203857
+                },
+                {
+                    "start_sec": 457.0,
+                    "end_sec": 457.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.6539787650108337
+                },
+                {
+                    "start_sec": 457.5,
+                    "end_sec": 458.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.5192087888717651
+                },
+                {
+                    "start_sec": 459.0,
+                    "end_sec": 459.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.7408674359321594
+                },
+                {
+                    "start_sec": 459.5,
+                    "end_sec": 460.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5700454711914062
+                },
+                {
+                    "start_sec": 460.0,
+                    "end_sec": 460.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5829421281814575
+                },
+                {
+                    "start_sec": 460.5,
+                    "end_sec": 461.0,
+                    "type": "Applause/Laughter",
+                    "energy": 0.697844386100769
+                },
+                {
+                    "start_sec": 462.0,
+                    "end_sec": 462.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6970988512039185
+                },
+                {
+                    "start_sec": 462.5,
+                    "end_sec": 463.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5927667617797852
+                },
+                {
+                    "start_sec": 465.0,
+                    "end_sec": 465.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6857225298881531
+                },
+                {
+                    "start_sec": 465.5,
+                    "end_sec": 466.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6212834715843201
+                },
+                {
+                    "start_sec": 467.5,
+                    "end_sec": 468.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5715866684913635
+                },
+                {
+                    "start_sec": 468.0,
+                    "end_sec": 468.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.7304442524909973
+                },
+                {
+                    "start_sec": 468.5,
+                    "end_sec": 469.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6722724437713623
+                },
+                {
+                    "start_sec": 470.5,
+                    "end_sec": 471.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.5515348315238953
+                },
+                {
+                    "start_sec": 476.0,
+                    "end_sec": 476.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6812136173248291
+                },
+                {
+                    "start_sec": 476.5,
+                    "end_sec": 477.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6641258001327515
+                },
+                {
+                    "start_sec": 479.5,
+                    "end_sec": 480.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6118969917297363
+                }
+            ]
+        },
+        {
+            "window_start": 480.0,
+            "window_end": 510.0,
+            "mean_energy_30s": 1.0,
+            "peaks_in_window": [
+                {
+                    "start_sec": 484.5,
+                    "end_sec": 485.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.8101608157157898
+                },
+                {
+                    "start_sec": 486.0,
+                    "end_sec": 486.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7125908136367798
+                },
+                {
+                    "start_sec": 487.0,
+                    "end_sec": 487.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7357416152954102
+                },
+                {
+                    "start_sec": 490.5,
+                    "end_sec": 491.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7434892654418945
+                },
+                {
+                    "start_sec": 492.5,
+                    "end_sec": 493.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7726679444313049
+                },
+                {
+                    "start_sec": 493.0,
+                    "end_sec": 493.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7518579363822937
+                },
+                {
+                    "start_sec": 499.5,
+                    "end_sec": 500.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7449333667755127
+                },
+                {
+                    "start_sec": 502.0,
+                    "end_sec": 502.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.751882016658783
+                },
+                {
+                    "start_sec": 505.0,
+                    "end_sec": 505.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.9226007461547852
+                },
+                {
+                    "start_sec": 506.0,
+                    "end_sec": 506.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7632724642753601
+                },
+                {
+                    "start_sec": 509.0,
+                    "end_sec": 509.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.9457957744598389
+                },
+                {
+                    "start_sec": 509.5,
+                    "end_sec": 510.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7766952514648438
+                }
+            ]
+        },
+        {
+            "window_start": 510.0,
+            "window_end": 534.5,
+            "mean_energy_30s": 0.0,
+            "peaks_in_window": [
+                {
+                    "start_sec": 511.5,
+                    "end_sec": 512.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7998968362808228
+                },
+                {
+                    "start_sec": 512.0,
+                    "end_sec": 512.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7646584510803223
+                },
+                {
+                    "start_sec": 512.5,
+                    "end_sec": 513.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6049442291259766
+                },
+                {
+                    "start_sec": 513.0,
+                    "end_sec": 513.5,
+                    "type": "Applause/Laughter",
+                    "energy": 0.41159355640411377
+                },
+                {
+                    "start_sec": 514.5,
+                    "end_sec": 515.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7307273745536804
+                },
+                {
+                    "start_sec": 515.0,
+                    "end_sec": 515.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6492090225219727
+                },
+                {
+                    "start_sec": 516.5,
+                    "end_sec": 517.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.764965295791626
+                },
+                {
+                    "start_sec": 517.5,
+                    "end_sec": 518.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.6856845617294312
+                },
+                {
+                    "start_sec": 518.0,
+                    "end_sec": 518.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.4502231180667877
+                },
+                {
+                    "start_sec": 518.5,
+                    "end_sec": 519.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.45843642950057983
+                },
+                {
+                    "start_sec": 519.0,
+                    "end_sec": 519.5,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.7781904339790344
+                },
+                {
+                    "start_sec": 519.5,
+                    "end_sec": 520.0,
+                    "type": "Emphasis/Raised Voice",
+                    "energy": 0.40603524446487427
+                }
+            ]
+        }
+    ]
+}

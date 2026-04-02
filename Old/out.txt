@@ -1,0 +1,24 @@
+=======================================================
+  UNIT TESTS
+=======================================================
+  [PASS] _seconds_to_mmss conversions correct
+  [PASS] No switch detected when same speaker talks consecutively
+  [PASS] 3 switches detected in A-B-A-B pattern
+  [PASS] Switches bucketed into correct 30s windows
+  [PASS] Normalization: max=1.0, zero=0.0, proportional scores correct
+  [PASS] All-zero switch counts → all scores 0.0 (no division by zero)
+  [PASS] Speaker stats: total speaking time computed correctly
+
+  All unit tests passed.
+
+=======================================================
+  INTEGRATION TEST (real model + audio_file.wav)
+=======================================================
+
+  [INFO] Running full pipeline on audio_file.wav …
+         (loads pyannote model — may take 30-60s on first run)
+
+[diarizer] Loading pyannote/segmentation-3.0 + speechbrain/spkrec-ecapa-voxceleb …
+           (First run downloads models to ~/.cache/huggingface/)
+[diarizer] Loading audio: audio_file.wav
+

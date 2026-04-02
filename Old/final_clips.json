@@ -1,0 +1,47 @@
+{
+  "content_type": "educational_tutorial",
+  "duration_mode": "0-10",
+  "target_duration_sec": 10,
+  "weights_used": {
+    "semantic": 0.45,
+    "energy": 0.35,
+    "dialogue": 0.2
+  },
+  "total_clips": 2,
+  "clips": [
+    {
+      "rank": 1,
+      "highlight_start": "04:08",
+      "highlight_end": "04:46",
+      "clip_start_sec": 275.5,
+      "clip_end_sec": 285.5,
+      "clip_start_time": "04:35",
+      "clip_end_time": "04:45",
+      "clip_duration_sec": 10.0,
+      "composite_score": 0.6621,
+      "semantic_score": 0.95,
+      "energy_score": 0.6702,
+      "dialogue_score": 0.0,
+      "hook": "It's okay to make mistakes!",
+      "engagement_type": "inspiration|humor|insight",
+      "reason": "This segment addresses common fears about learning English, reassuring viewers that making mistakes is part of the process. The emotional peak of encouragement and relatability makes it highly engaging."
+    },
+    {
+      "rank": 2,
+      "highlight_start": "05:01",
+      "highlight_end": "05:46",
+      "clip_start_sec": 307.0,
+      "clip_end_sec": 317.0,
+      "clip_start_time": "05:07",
+      "clip_end_time": "05:17",
+      "clip_duration_sec": 10.0,
+      "composite_score": 0.5192,
+      "semantic_score": 0.9,
+      "energy_score": 0.3261,
+      "dialogue_score": 0.0,
+      "hook": "Three easy tips to learn English every day!",
+      "engagement_type": "action|insight",
+      "reason": "The presenter offers concrete, actionable tips for learning English, making it practical and useful for viewers. This clear structure and the promise of simplicity resonate well with the audience."
+    }
+  ]
+}

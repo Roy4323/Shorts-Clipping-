@@ -1,0 +1,72 @@
+{
+  "highlights": [
+    {
+      "rank": 1,
+      "start_time": "04:08",
+      "end_time": "04:46",
+      "duration_seconds": 38,
+      "score": 0.95,
+      "engagement_type": "inspiration|humor|insight",
+      "content_type": "motivational_speech",
+      "hook": "It's okay to make mistakes!",
+      "reason": "This segment addresses common fears about learning English, reassuring viewers that making mistakes is part of the process. The emotional peak of encouragement and relatability makes it highly engaging."
+    },
+    {
+      "rank": 2,
+      "start_time": "05:01",
+      "end_time": "05:46",
+      "duration_seconds": 45,
+      "score": 0.9,
+      "engagement_type": "action|insight",
+      "content_type": "educational_tutorial",
+      "hook": "Three easy tips to learn English every day!",
+      "reason": "The presenter offers concrete, actionable tips for learning English, making it practical and useful for viewers. This clear structure and the promise of simplicity resonate well with the audience."
+    },
+    {
+      "rank": 3,
+      "start_time": "06:55",
+      "end_time": "07:45",
+      "duration_seconds": 50,
+      "score": 0.88,
+      "engagement_type": "inspiration|humor",
+      "content_type": "motivational_speech",
+      "hook": "You are doing a great job!",
+      "reason": "This section emphasizes self-encouragement and celebrates progress, which can inspire viewers. The positive tone and relatable message create an emotional connection."
+    },
+    {
+      "rank": 4,
+      "start_time": "02:01",
+      "end_time": "02:36",
+      "duration_seconds": 35,
+      "score": 0.85,
+      "engagement_type": "insight|action",
+      "content_type": "educational_tutorial",
+      "hook": "Make English part of your life!",
+      "reason": "The speaker discusses integrating English learning into daily routines, providing a relatable and actionable insight that can motivate viewers to adopt similar habits."
+    },
+    {
+      "rank": 5,
+      "start_time": "03:10",
+      "end_time": "03:36",
+      "duration_seconds": 26,
+      "score": 0.8,
+      "engagement_type": "humor|insight",
+      "content_type": "educational_tutorial",
+      "hook": "Talking to yourself in English feels funny but helps!",
+      "reason": "This light-hearted moment about talking to oneself in English adds humor while also providing a unique learning tip, making it memorable and engaging."
+    }
+  ],
+  "analysis_summary": "The video is an encouraging and practical guide for beginner English learners, focusing on integrating language practice into daily life. Its tone is supportive and motivational, making it accessible for viewers at all levels.",
+  "metadata": {
+    "transcript_file": "my_video_transcript.txt",
+    "total_segments": 166,
+    "total_duration_seconds": 527,
+    "total_duration_human": "08:47",
+    "model": "gpt-4o-mini-2024-07-18",
+    "tokens": {
+      "prompt": 2519,
+      "completion": 649,
+      "total": 3168
+    }
+  }
+}
