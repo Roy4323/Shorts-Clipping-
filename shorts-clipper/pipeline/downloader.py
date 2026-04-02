@@ -57,6 +57,10 @@ def _extract_info(url: str, *, download: bool, outtmpl: str | None = None) -> di
         ydl_opts["merge_output_format"] = "mp4"
         ydl_opts["nopart"] = True
         ydl_opts["hls_prefer_native"] = True
+        ydl_opts["retries"] = 3
+        ydl_opts["fragment_retries"] = 3
+        ydl_opts["file_access_retries"] = 3
+        ydl_opts["http_chunk_size"] = 1048576  # 1MB chunks — smaller chunks = more stable on poor connections
         if outtmpl is not None:
             ydl_opts["outtmpl"] = outtmpl
 

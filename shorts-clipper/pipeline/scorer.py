@@ -37,7 +37,7 @@ from utils.storage import get_job_subdir
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 TARGET_DURATION = 45.0   # stub: target seconds per clip
-MIN_DURATION    = 20.0   # minimum accepted clip length
+MIN_DURATION    = 10.0   # minimum accepted clip length (Relaxed for high-energy highlights)
 MAX_DURATION    = 90.0   # maximum accepted clip length
 
 # Weight profiles keyed by content_type returned by Signal 1 (OpenAI)
@@ -62,6 +62,7 @@ def score_windows(
     video_duration: float,
     audio_wav_path: str | None = None,
     job_id: str | None = None,
+    shorts_count: int = 3,
 ) -> tuple[list[dict], str | None]:
     """
     Score clip windows using the multi-signal engine.
@@ -82,28 +83,39 @@ def score_windows(
         f"[SCORER] Inputs — duration={video_duration:.2f}s "
         f"| segments={len(transcript.segments)} | source={transcript.source} "
         f"| wav={'YES' if audio_wav_path and Path(audio_wav_path).exists() else 'NO'} "
-        f"| job_id={job_id}"
+        f"| shorts_count={shorts_count} | job_id={job_id}"
     )
 
     has_openai = bool(settings.openai_api_key.strip())
     has_hf     = bool(settings.hugging_face_token.strip())
 
+    key = settings.openai_api_key.strip()
+    logger.info(
+        f"[SCORER] API key check — "
+        f"prefix={key[:12] if key else 'EMPTY'} | "
+        f"suffix={key[-6:] if key else 'EMPTY'} | "
+        f"length={len(key)} | "
+        f"has_openai={has_openai} | has_hf={has_hf}"
+    )
+
     if not has_openai:
         msg = "OPENAI_API_KEY not set — used stub scorer (equal-time windows, no AI ranking)."
         logger.warning(f"[SCORER] {msg}")
-        return _stub_score(transcript, video_duration), msg
+        return _stub_score(transcript, video_duration, shorts_count), msg
 
     wav_ok = audio_wav_path and Path(audio_wav_path).exists()
     if not wav_ok:
         msg = "WAV audio file not available — used stub scorer (equal-time windows, no AI ranking)."
         logger.warning(f"[SCORER] {msg}")
-        return _stub_score(transcript, video_duration), msg
+        return _stub_score(transcript, video_duration, shorts_count), msg
 
     try:
         logger.info("[SCORER] Starting multi-signal scoring engine.")
         windows = _multi_signal_score(
-            transcript, video_duration, audio_wav_path, job_id, has_hf
+            transcript, video_duration, audio_wav_path, job_id, has_hf, shorts_count
         )
+        windows = windows[:shorts_count]
+        logger.info(f"[SCORER] Trimmed to {len(windows)} windows (shorts_count={shorts_count})")
         return windows, None
     except Exception as exc:
         # Extract a clean human-readable message from the exception
@@ -125,7 +137,7 @@ def score_windows(
             f"[SCORER] Multi-signal scoring failed: {exc} — falling back to stub.",
             exc_info=True,
         )
-        return _stub_score(transcript, video_duration), msg
+        return _stub_score(transcript, video_duration, shorts_count), msg
 
 
 # ── Multi-signal engine ───────────────────────────────────────────────────────
@@ -136,6 +148,7 @@ def _multi_signal_score(
     audio_wav_path: str,
     job_id: str | None,
     has_hf: bool,
+    shorts_count: int = 3,
 ) -> list[dict]:
     """Run all three signals and combine into scored windows."""
 
@@ -155,46 +168,73 @@ def _multi_signal_score(
     logger.info(f"[SCORER] Signal 1 — Semantic analysis | {len(segs)} segments ...")
 
     # ── Signal 1: OpenAI semantic highlights ─────────────────────────────────
+    if len(segs) < 3:
+        logger.warning(
+            f"[SCORER] Signal 1 — Only {len(segs)} transcript segment(s). "
+            "OpenAI needs a real transcript to find highlights. "
+            "This video may have no captions or Supadata returned a mock transcript."
+        )
     from service.video_analyzer import analyze_segments
     hl_data    = analyze_segments(segs, highlight_json, source_label="pipeline")
     highlights = hl_data.get("highlights", [])
-    logger.info(f"[SCORER] Signal 1 complete: {len(highlights)} highlights found.")
+    if not highlights:
+        logger.warning(
+            "[SCORER] Signal 1 returned 0 highlights — "
+            "transcript may be too short or OpenAI found nothing engaging. "
+            f"transcript_segments={len(segs)} source={transcript.source}"
+        )
+    else:
+        logger.info(f"[SCORER] Signal 1 complete: {len(highlights)} highlights found.")
 
     # ── Signal 2: Audio energy ───────────────────────────────────────────────
-    logger.info("[SCORER] Signal 2 — Audio energy analysis ...")
-    from service.audio_analyzer import analyze_audio
-    audio_data = analyze_audio(audio_wav_path, audio_json)
-    logger.info("[SCORER] Signal 2 complete.")
+    logger.info(f"[SCORER] Signal 2 — Audio energy analysis | wav={audio_wav_path} ...")
+    try:
+        from service.audio_analyzer import analyze_audio
+        audio_data = analyze_audio(audio_wav_path, audio_json)
+        windows_count = len(audio_data.get("analysis_30s_windows", []))
+        logger.info(f"[SCORER] Signal 2 complete: {windows_count} energy windows analysed.")
+    except Exception as exc:
+        logger.error(f"[SCORER] Signal 2 (audio energy) FAILED: {exc}", exc_info=True)
+        raise
 
     # ── Signal 3: Speaker turn density (optional — needs HuggingFace token) ──
     dialogue_data: dict | None = None
     if has_hf:
-        logger.info("[SCORER] Signal 3 — Speaker turn density ...")
+        logger.info(f"[SCORER] Signal 3 — Speaker turn density | wav={audio_wav_path} ...")
         try:
             from service.speaker_turn_density import score_speaker_turn_density, save_results
             dialogue_data = score_speaker_turn_density(audio_wav_path)
             save_results(dialogue_data, dialogue_json)
-            logger.info("[SCORER] Signal 3 complete.")
+            switches = dialogue_data.get("metadata", {}).get("total_switches", "?")
+            speakers = dialogue_data.get("metadata", {}).get("num_speakers", "?")
+            logger.info(f"[SCORER] Signal 3 complete: {speakers} speakers, {switches} switches detected.")
         except Exception as exc:
             logger.warning(
-                f"[SCORER] Signal 3 (pyannote diarization) failed: {exc} "
-                "— dialogue score will be 0 for all windows."
+                f"[SCORER] Signal 3 (pyannote diarization) FAILED: {exc} "
+                "— dialogue score will be 0 for all windows.",
+                exc_info=True,
             )
     else:
-        logger.warning(
-            "[SCORER] HUGGING_FACE_TOKEN not set — Signal 3 skipped. "
-            "Dialogue scores will be 0."
-        )
+        logger.warning("[SCORER] HUGGING_FACE_TOKEN not set — Signal 3 skipped. Dialogue scores will be 0.")
 
     # ── Combine ───────────────────────────────────────────────────────────────
+    logger.info(
+        f"[SCORER] Combining signals — "
+        f"highlights={len(highlights)} | "
+        f"audio_windows={len(audio_data.get('analysis_30s_windows', []))} | "
+        f"dialogue={'yes' if dialogue_data else 'no (skipped/failed)'}"
+    )
     windows = _combine(highlights, audio_data, dialogue_data, video_duration)
 
     if not windows:
-        logger.warning(
-            "[SCORER] Multi-signal engine produced no windows "
-            "(highlights may all be out of range) — falling back to stub."
+        reason = (
+            "Signal 1 returned 0 highlights" if not highlights
+            else "all highlights were out of video range or too short"
         )
-        return _stub_score(transcript, video_duration)
+        logger.warning(
+            f"[SCORER] Multi-signal engine produced no windows ({reason}) — falling back to stub."
+        )
+        return _stub_score(transcript, video_duration, shorts_count)
 
     logger.info(f"[SCORER] Multi-signal scoring complete: {len(windows)} windows selected.")
     return windows
@@ -339,21 +379,21 @@ def _nearest_boundary(seconds: float, segments: list, prefer_end: bool) -> float
     return min(candidates, key=lambda t: abs(t - seconds))
 
 
-def _stub_score(transcript: TranscriptResult, video_duration: float) -> list[dict]:
+def _stub_score(transcript: TranscriptResult, video_duration: float, shorts_count: int = 3) -> list[dict]:
     """
     Divide video into equal-duration windows snapped to transcript boundaries.
     Used as fallback when the multi-signal engine is unavailable.
     """
     logger.info(
         f"[SCORER] Stub scoring | duration={video_duration:.2f}s "
-        f"| segments={len(transcript.segments)}"
+        f"| segments={len(transcript.segments)} | shorts_count={shorts_count}"
     )
 
     if video_duration <= 0:
         logger.warning("[SCORER] Video duration is 0 — cannot produce windows.")
         return []
 
-    n_windows = max(1, math.ceil(video_duration / TARGET_DURATION))
+    n_windows = max(1, min(shorts_count, math.ceil(video_duration / TARGET_DURATION)))
     chunk     = video_duration / n_windows
     segs      = transcript.segments
 

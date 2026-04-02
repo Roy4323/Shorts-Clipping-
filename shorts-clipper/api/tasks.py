@@ -16,6 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from agents.classifier_agent import classify_content
+from agents.vision_agent import detect_regions
 from api.models import (
     ClassificationResult,
     ClipResult,
@@ -111,6 +112,10 @@ def _run_pipeline(job_id: str, url: str) -> None:
     _set(job_id, stage="downloading", progress_pct=5)
 
     audio_wav_path: str | None = None
+    payload = job_store.get(job_id)
+    shorts_count: int = int(payload.get("shorts_count", 3))
+    subtitle_preset: str = payload.get("subtitle_preset", "default")
+    logger.info(f"[PIPELINE] shorts_count={shorts_count} | subtitle_preset={subtitle_preset}")
 
     if is_local:
         payload = job_store.get(job_id)
@@ -195,6 +200,8 @@ def _run_pipeline(job_id: str, url: str) -> None:
     _run_clipping_pipeline(
         job_id, metadata, classification, transcript_result, video_path,
         audio_wav_path=audio_wav_path,
+        shorts_count=shorts_count,
+        subtitle_preset=subtitle_preset,
     )
 
 
@@ -215,14 +222,18 @@ def regenerate_clips_task(job_id: str) -> None:
         classification = ClassificationResult(**payload["classification"])
         transcript_result = TranscriptResult(**payload["transcript"])
         video_path = Path(payload["artifacts"]["video_path"])
-        # Reuse existing WAV if present (lives beside the video)
-        wav_candidate = Path(video_path).parent / "audio.wav"
+        wav_candidate = get_job_dir(job_id) / "audio.wav"
         regen_wav = str(wav_candidate) if wav_candidate.exists() else None
+        
+        shorts_count = int(payload.get("shorts_count", 3))
+        subtitle_preset = payload.get("subtitle_preset", "default")
 
         _run_clipping_pipeline(
             job_id, metadata, classification, transcript_result, video_path,
             start_offset=start_offset, existing_clips=existing_clips,
             audio_wav_path=regen_wav,
+            shorts_count=shorts_count,
+            subtitle_preset=subtitle_preset,
         )
     except Exception as exc:
         logger.error(f"❌ Job {job_id} regeneration failed: {exc}", exc_info=True)
@@ -239,6 +250,8 @@ def _run_clipping_pipeline(
     start_offset: int = 0,
     existing_clips: list[dict] | None = None,
     audio_wav_path: str | None = None,
+    shorts_count: int = 3,
+    subtitle_preset: str = "default",
 ) -> None:
     """Executes Pipeline Stages 3 through 6. Appends to existing clips if provided."""
 
@@ -262,6 +275,7 @@ def _run_clipping_pipeline(
         video_duration,
         audio_wav_path=audio_wav_path,
         job_id=job_id,
+        shorts_count=shorts_count,
     )
     if not windows:
         raise RuntimeError(
@@ -295,9 +309,19 @@ def _run_clipping_pipeline(
     for i, clip_path in enumerate(raw_clips, 1):
         idx = start_offset + i
         logger.info(f"[PIPELINE] Reframing clip {idx}/{start_offset + len(raw_clips)}: {Path(clip_path).name}")
+        
+        # AI Region Detection
+        regions = detect_regions(clip_path)
+        
         out = reframed_dir / f"reframed_{idx:02d}.mp4"
-        reframed_path = reframe_clip(clip_path, out, classification.content_type)
-        reframed_clips.append(reframed_path)
+        reframed_path, layout_type = reframe_clip(clip_path, out, classification.content_type, regions=regions)
+        
+        reframed_clips.append({
+            "path": reframed_path,
+            "layout": layout_type,
+            "regions": regions
+        })
+        
         pct = 60 + int(i / len(raw_clips) * 20)
         _set(job_id, progress_pct=pct)
 
@@ -312,8 +336,9 @@ def _run_clipping_pipeline(
     final_dir = get_job_subdir(job_id, "final")
     new_clip_results: list[ClipResult] = []
 
-    for i, (reframed_path, window) in enumerate(zip(reframed_clips, windows), 1):
+    for i, (rc, window) in enumerate(zip(reframed_clips, windows), 1):
         idx = start_offset + i
+        reframed_path = rc["path"]
         logger.info(f"[PIPELINE] Burning subtitles for clip {idx}/{start_offset + len(reframed_clips)}: {window['start']:.1f}s-{window['end']:.1f}s")
         out = final_dir / f"short_{idx:02d}.mp4"
         burn_subtitles(
@@ -322,6 +347,7 @@ def _run_clipping_pipeline(
             window["start"],
             window["end"],
             out,
+            preset=subtitle_preset,
         )
         new_clip_results.append(
             ClipResult(
@@ -333,6 +359,8 @@ def _run_clipping_pipeline(
                 hook=window.get("hook", ""),
                 engagement_type=window.get("engagement_type", ""),
                 reason=window.get("reason", ""),
+                layout=rc["layout"],
+                regions=rc["regions"],
             )
         )
         pct = 80 + int(i / len(reframed_clips) * 18)

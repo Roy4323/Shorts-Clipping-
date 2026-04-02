@@ -50,7 +50,19 @@
             autocomplete="off" spellcheck="false">
           <button class="btn-primary" id="process-url-btn">Process ›</button>
         </div>
-        <p class="hint-text">Supports YouTube long-form videos and Shorts</p>
+        <div class="url-options-row">
+          <span class="hint-text">Supports YouTube long-form videos and Shorts</span>
+          <div class="count-selector">
+            <span class="count-label">Shorts to generate</span>
+            <div class="count-btns" id="count-btns">
+              <button class="count-btn" data-n="1">1</button>
+              <button class="count-btn" data-n="2">2</button>
+              <button class="count-btn active" data-n="3">3</button>
+              <button class="count-btn" data-n="4">4</button>
+              <button class="count-btn" data-n="5">5</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Upload Tab -->
@@ -164,6 +176,13 @@
             <source id="audio-src" src="" type="audio/mpeg">
           </audio>
         </div>
+      </div>
+
+      <!-- Scoring Results -->
+      <div class="scoring-section hidden" id="scoring-section">
+        <div class="panel-label">🎯 Scoring Results</div>
+        <div class="scoring-meta" id="scoring-meta"></div>
+        <div class="scoring-windows" id="scoring-windows"></div>
       </div>
 
       <!-- Generated Shorts — playable + downloadable -->

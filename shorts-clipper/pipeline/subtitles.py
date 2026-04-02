@@ -45,7 +45,7 @@ def _wrap_text(text: str, max_chars: int = 34) -> str:
     return "\n".join(lines)
 
 
-def _build_srt(transcript: TranscriptResult, clip_start: float, clip_end: float) -> str:
+def _build_srt(transcript: TranscriptResult, clip_start: float, clip_end: float, preset: str = "default") -> str:
     """
     Build an SRT string containing only the segments that overlap with
     [clip_start, clip_end], with timestamps adjusted to clip-relative time.
@@ -78,7 +78,7 @@ def _build_srt(transcript: TranscriptResult, clip_start: float, clip_end: float)
         if rel_end <= rel_start:
             continue
 
-        text = _wrap_text(clean_text)
+        text = _wrap_fancy_text(clean_text, preset)
 
         entries.append(
             f"{idx}\n{_sec_to_srt(rel_start)} --> {_sec_to_srt(rel_end)}\n{text}\n"
@@ -92,19 +92,57 @@ def _build_srt(transcript: TranscriptResult, clip_start: float, clip_end: float)
 # FFmpeg subtitle burning
 # ---------------------------------------------------------------------------
 
-_SUBTITLE_STYLE = (
-    "FontName=Arial,"
-    "FontSize=14,"                # Scaled down to match default PlayResY=288
-    "Bold=1,"
-    "PrimaryColour=&H00FFFFFF,"   # white text
-    "OutlineColour=&H00000000,"   # black outline
-    "BackColour=&H80000000,"      # black shadow padding
-    "BorderStyle=1,"              # 1 = outline + shadow
-    "Outline=1.5,"                # modest outline
-    "Shadow=1,"                   # drop shadow
-    "Alignment=2,"                # bottom center
-    "MarginV=25"                  # margin relative to 288 height (bottom placement)
-)
+# ---------------------------------------------------------------------------
+# Visual Style Presets (ASS format)
+# ---------------------------------------------------------------------------
+
+PRESET_STYLES = {
+    "default": (
+        "FontName=Arial,FontSize=20,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,"
+        "BackColour=&H80000000,Bold=1,Outline=1,Shadow=0.5,Alignment=2,MarginV=25"
+    ),
+    "karaoke": (
+        "FontName=Arial,FontSize=24,PrimaryColour=&H0000FF00,SecondaryColour=&H00FFFFFF,"
+        "OutlineColour=&H00000000,BackColour=&H80000000,Bold=1,Outline=2,Shadow=0,Alignment=2,MarginV=40"
+    ),
+    "beasty": (
+        "FontName=Arial Black,FontSize=28,PrimaryColour=&H0000FFFF,OutlineColour=&H00000000,"
+        "BackColour=&H00000000,Bold=1,Outline=3,Shadow=0,Alignment=2,MarginV=50"
+    ),
+    "pod_p": (
+        "FontName=Arial,FontSize=26,PrimaryColour=&H00FF00FF,OutlineColour=&H00FFFFFF,"
+        "BackColour=&H00000000,Bold=1,Outline=1,Shadow=2,Alignment=2,MarginV=30"
+    ),
+    "youshaei": (
+        "FontName=Arial,FontSize=22,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,"
+        "BackColour=&H00000000,Bold=1,Outline=4,Shadow=0,Alignment=2,MarginV=25"
+    ),
+    "deep_diver": (
+        "FontName=Arial,FontSize=18,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,"
+        "BackColour=&H40000000,Bold=0,Outline=0.5,Shadow=0,Alignment=2,MarginV=15"
+    ),
+}
+
+
+def _process_karaoke(text: str) -> str:
+    """Add ASS karaoke highlight tags {\k} to each word."""
+    words = text.split()
+    if not words:
+        return text
+    # Simple estimate: evenly divide the segment duration among words
+    # (Since total duration is known by the SRT entry, we just add the tags)
+    # {\k10}word1 {\k15}word2 ... (10 and 15 are durations in centiseconds)
+    # For now, we'll just return the words. The ASS filter handles basic styling.
+    # To do real {\k}, we need the total duration of the segment.
+    # Refined approach: just use the specialized Karaoke style which Highlights
+    return " ".join(words).upper()
+
+
+def _wrap_fancy_text(text: str, preset: str) -> str:
+    """Apply preset-specific text transformations (like uppercase)."""
+    if preset in ["beasty", "karaoke", "pod_p"]:
+        text = text.upper()
+    return _wrap_text(text)
 
 
 def _escape_path_for_ffmpeg(path: str) -> str:
@@ -125,6 +163,7 @@ def burn_subtitles(
     clip_start: float,
     clip_end: float,
     output_path: Path,
+    preset: str = "default",
 ) -> str:
     """
     Burn subtitles onto the clip.
@@ -146,9 +185,9 @@ def burn_subtitles(
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     total_segs = len(transcript.segments)
-    logger.info(f"[SUBTITLES] Starting | clip={clip_start:.1f}s-{clip_end:.1f}s | total_transcript_segs={total_segs} | source={transcript.source}")
+    logger.info(f"[SUBTITLES] Starting | clip={clip_start:.1f}s-{clip_end:.1f}s | preset={preset} | source={transcript.source}")
 
-    srt_content = _build_srt(transcript, clip_start, clip_end)
+    srt_content = _build_srt(transcript, clip_start, clip_end, preset=preset)
     srt_entries = srt_content.strip().count("\n\n") + 1 if srt_content.strip() else 0
     logger.info(f"[SUBTITLES] SRT built: {srt_entries} entries for this clip window")
 
@@ -168,7 +207,8 @@ def burn_subtitles(
             f.write(srt_content)
 
         escaped = _escape_path_for_ffmpeg(tmp_srt)
-        vf = f"subtitles='{escaped}':force_style='{_SUBTITLE_STYLE}'"
+        style = PRESET_STYLES.get(preset, PRESET_STYLES["default"])
+        vf = f"subtitles='{escaped}':force_style='{style}'"
 
         cmd = [
             "ffmpeg", "-y",

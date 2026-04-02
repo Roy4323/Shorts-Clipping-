@@ -24,9 +24,28 @@ ContentType = Literal[
     "general",
 ]
 
+LayoutType = Literal[
+    "fill",
+    "screenshare",
+    "split_two",
+    "split_three",
+    "gameplay",
+]
+
+
+class Region(BaseModel):
+    label: str  # "face", "screen", "gameplay"
+    x1: int     # 0-1000
+    y1: int     # 0-1000
+    x2: int     # 0-1000
+    y2: int     # 0-1000
+    score: float = 1.0
+
 
 class JobRequest(BaseModel):
     url: HttpUrl
+    shorts_count: int = Field(default=3, ge=1, le=10)
+    subtitle_preset: str = Field(default="default")
 
 
 class HealthResponse(BaseModel):
@@ -86,6 +105,9 @@ class ClipResult(BaseModel):
     hook: str = Field(default="")
     engagement_type: str = Field(default="")
     reason: str = Field(default="")
+    # AI Layouts
+    layout: LayoutType = Field(default="fill")
+    regions: list[Region] = Field(default_factory=list)
 
 
 class JobStatus(BaseModel):

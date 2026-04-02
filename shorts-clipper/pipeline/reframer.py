@@ -11,7 +11,9 @@ import json
 import statistics
 import subprocess
 from pathlib import Path
+from typing import Any
 
+from api.models import LayoutType, Region
 from utils.logger import logger
 
 try:
@@ -135,73 +137,100 @@ def _run_ffmpeg_crop(input_path: str, output_path: str, vf_string: str) -> None:
         raise ReframerError(f"FFmpeg crop failed:\n{result.stderr[-600:]}")
 
 
+def _get_layout_vf(regions: list[Region], width: int, height: int) -> tuple[str, LayoutType]:
+    """
+    Decide on a layout strategy and return the FFmpeg filter string + type.
+    """
+    if not regions:
+        # Default behavior: single center crop
+        ah, ay = height, 0  # Simplified for this example
+        cw = int(height * 9 / 16)
+        cx = (width - cw) // 2
+        return f"crop={cw}:ih:{cx}:0,scale=1080:1920", "fill"
+
+    # 1. Look for specialized containers (Screen, Gameplay)
+    screens = [r for r in regions if r.label == "screen"]
+    gameplay = [r for r in regions if r.label == "gameplay"]
+    faces = [r for r in regions if r.label == "face"]
+
+    # 2. Logic: ScreenShare (Face + Screen)
+    if screens and faces:
+        f, s = faces[0], screens[0]
+        # Crop coordinates from 0-1000 to internal pixels
+        fx1, fy1, fx2, fy2 = int(f.x1*width/1000), int(f.y1*height/1000), int(f.x2*width/1000), int(f.y2*height/1000)
+        sx1, sy1, sx2, sy2 = int(s.x1*width/1000), int(s.y1*height/1000), int(s.x2*width/1000), int(s.y2*height/1000)
+        
+        # Build 1080x1920 stack
+        # [0:v]crop=w:h:x:y,scale=1080:h2[top]; [0:v]crop=sw:sh:sx:sy,scale=1080:sh2[bot]; [top][bot]vstack
+        vf = (
+            f"[0:v]crop={fx2-fx1}:{fy2-fy1}:{fx1}:{fy1},scale=1080:-1[t]; "
+            f"[0:v]crop={sx2-sx1}:{sy2-sy1}:{sx1}:{sy1},scale=1080:-1[b]; "
+            f"[t][b]vstack=inputs=2,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black"
+        )
+        return vf, "screenshare"
+
+    # 3. Logic: Gameplay (Face + Gameplay)
+    if gameplay and faces:
+        f, g = faces[0], gameplay[0]
+        fx1, fy1, fx2, fy2 = int(f.x1*width/1000), int(f.y1*height/1000), int(f.x2*width/1000), int(f.y2*height/1000)
+        gx1, gy1, gx2, gy2 = int(g.x1*width/1000), int(g.y1*height/1000), int(g.x2*width/1000), int(g.y2*height/1000)
+        
+        vf = (
+            f"[0:v]crop={fx2-fx1}:{fy2-fy1}:{fx1}:{fy1},scale=1080:-1[t]; "
+            f"[0:v]crop={gx2-gx1}:{gy2-gy1}:{gx1}:{gy1},scale=1080:-1[b]; "
+            f"[t][b]vstack=inputs=2,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black"
+        )
+        return vf, "gameplay"
+
+    # 4. Logic: Multi-Face Split (Interviews)
+    if len(faces) >= 2:
+        num = min(len(faces), 3)
+        clips = []
+        for i in range(num):
+            f = faces[i]
+            x1, y1, x2, y2 = int(f.x1*width/1000), int(f.y1*height/1000), int(f.x2*width/1000), int(f.y2*height/1000)
+            clips.append(f"[0:v]crop={x2-x1}:{y2-y1}:{x1}:{y1},scale=1080:-1[v{i}]")
+        
+        vf = "; ".join(clips) + "; " + "".join(f"[v{i}]" for i in range(num)) + f"vstack=inputs={num},pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black"
+        return vf, ("split_two" if num==2 else "split_three")
+
+    # 5. Default Face Centering (Improved)
+    if faces:
+        f = faces[0]
+        # Calculate a nice 9:16 box around the face
+        face_x = (f.x1 + f.x2) / 2000.0 * width
+        cw = int(height * 9 / 16)
+        cx = int(face_x - cw/2)
+        cx = max(0, min(cx, width - cw))
+        return f"crop={cw}:ih:{cx}:0,scale=1080:1920", "fill"
+
+    # Final fallback
+    cw = int(height * 9 / 16)
+    cx = (width - cw) // 2
+    return f"crop={cw}:ih:{cx}:0,scale=1080:1920", "fill"
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
-def reframe_clip(input_path: str, output_path: Path, content_type: str) -> str:
+def reframe_clip(input_path: str, output_path: Path, content_type: str, regions: list[Region] | None = None) -> tuple[str, LayoutType]:
     """
-    Reframe a clip from 16:9 to 9:16.
-
-    Args:
-        input_path:   Path to the raw clip (16:9 or any aspect).
-        output_path:  Destination path for the reframed clip.
-        content_type: ContentType string from the classifier.
-
-    Returns:
-        Absolute path to the reframed clip (str).
+    Reframe a clip from 16:9 to 9:16 using multi-region layout logic.
+    Returns (output_path, layout_type).
     """
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    logger.info(f"[REFRAMER] Starting | input={Path(input_path).name} | content_type={content_type} | mediapipe={'available' if _MEDIAPIPE_OK else 'NOT installed'}")
+    logger.info(f"[REFRAMER] Starting | input={Path(input_path).name} | layout_regions={len(regions or [])}")
 
     width, height = _probe_video(input_path)
+    vf_string, layout_type = _get_layout_vf(regions or [], width, height)
     
-    # NEW: Detect active image bounds to strip cinematic green/black bars
-    active_crop = _detect_vertical_crop(input_path)
-    if active_crop:
-        ah, ay = active_crop
-        logger.info(f"[REFRAMER] Detected active frame: {width}x{ah} (offset_y={ay})")
-    else:
-        ah, ay = height, 0
-
-    crop_w = int(ah * 9 / 16)
-    logger.info(f"[REFRAMER] Target crop_w={crop_w} for active height {ah} (9:16)")
-
-    # If the clip is already portrait (crop_w >= width), just copy it through
-    if crop_w >= width:
-        logger.info(f"[REFRAMER] Already portrait ({width}x{height}) — copying without crop.")
-        cmd = ["ffmpeg", "-y", "-i", str(input_path), "-c", "copy", str(output_path)]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode != 0:
-            raise ReframerError(f"FFmpeg copy failed:\n{result.stderr[-400:]}")
-        return str(output_path)
-
-    # Determine crop_x
-    crop_x: int
-    if content_type in _FACE_TYPES and _MEDIAPIPE_OK:
-        logger.info(f"[REFRAMER] Running MediaPipe face detection on sampled frames...")
-        centers = _face_center_x_fractions(input_path)
-        if centers:
-            median_frac = statistics.median(centers)
-            crop_x = int(median_frac * width - crop_w / 2)
-            logger.info(f"[REFRAMER] Face detection: {len(centers)} samples | median_x={median_frac:.3f} | crop_x={crop_x}")
-        else:
-            logger.info(f"[REFRAMER] No faces detected — using center crop.")
-            crop_x = (width - crop_w) // 2
-    else:
-        logger.info(f"[REFRAMER] content_type='{content_type}' → center crop (no face detection).")
-        crop_x = (width - crop_w) // 2
-
-    # Clamp so we never exceed frame boundaries
-    crop_x = max(0, min(crop_x, width - crop_w))
-    
-    vf_string = f"crop=iw:{ah}:0:{ay},crop={crop_w}:{ah}:{crop_x}:0"
-    logger.info(f"[REFRAMER] Final crop chain: {vf_string}")
+    logger.info(f"[REFRAMER] Layout: {layout_type} | Filter: {vf_string[:100]}...")
 
     _run_ffmpeg_crop(input_path, str(output_path), vf_string)
 
     size_mb = output_path.stat().st_size / (1024 * 1024)
     logger.info(f"[REFRAMER] Done: {output_path.name} ({size_mb:.1f} MB)")
-    return str(output_path)
+    return str(output_path), layout_type

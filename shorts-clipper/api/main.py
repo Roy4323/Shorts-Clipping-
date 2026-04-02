@@ -60,6 +60,7 @@ def process_video(request: JobRequest, background_tasks: BackgroundTasks) -> Pro
         job_id,
         {
             "url": str(request.url),
+            "shorts_count": request.shorts_count,
             "stage": "queued",
             "progress_pct": 0,
             "clips": [],
@@ -69,6 +70,7 @@ def process_video(request: JobRequest, background_tasks: BackgroundTasks) -> Pro
             "classification": None,
             "transcript": None,
             "error_message": None,
+            "scorer_warning": None,
         },
     )
     background_tasks.add_task(process_video_task, job_id, str(request.url))

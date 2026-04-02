@@ -9,6 +9,7 @@ HuggingFace setup:
 """
 
 import json
+import os
 from collections import defaultdict
 from config import settings
 
@@ -24,13 +25,24 @@ def run_diarization(audio_path: str) -> list[dict]:
     if not hf_token:
         raise ValueError("HUGGING_FACE_TOKEN not found in .env")
 
-    import torch
-    import numpy as np
-    import soundfile as sf
-    from pyannote.audio import Model, Inference
+    try:
+        import torch
+        import numpy as np
+        import soundfile as sf
+        from pyannote.audio import Model, Inference
+    except ImportError:
+        logger.error(
+            "[DIARIZER] Error: Missing dependencies (pyannote-audio). "
+            "Please run: pip install pyannote-audio torch torchvision torchaudio"
+        )
+        return []
 
     print("[diarizer] Loading pyannote/segmentation-3.0 ...")
-    seg_model = Model.from_pretrained("pyannote/segmentation-3.0", token=hf_token)
+    try:
+        seg_model = Model.from_pretrained("pyannote/segmentation-3.0", token=hf_token)
+    except Exception as e:
+        logger.error(f"[DIARIZER] Failed to load model: {e}")
+        return []
 
     print(f"[diarizer] Loading audio: {audio_path}")
     data, sample_rate = sf.read(audio_path, dtype="float32", always_2d=True)

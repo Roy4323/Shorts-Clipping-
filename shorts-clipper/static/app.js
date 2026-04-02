@@ -7,6 +7,7 @@
   let activeJobId    = null;   // currently being polled
   let viewJobId      = null;   // currently shown in detail view
   let pollTimer      = null;
+  let shortsCount    = 3;      // how many shorts to generate
 
   const LS_KEY = 'sc_active_job';
 
@@ -28,6 +29,15 @@
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       btn.classList.add('active');
       $(`${btn.dataset.tab}-tab`).classList.add('active');
+    });
+  });
+
+  // ── Shorts count selector ──────────────────────────────────────────
+  document.querySelectorAll('.count-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      shortsCount = parseInt(btn.dataset.n, 10);
     });
   });
 
@@ -81,7 +91,7 @@
       const r = await fetch('/api/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, shorts_count: shortsCount }),
       });
       if (!r.ok) throw new Error((await r.json()).detail || r.statusText);
       const { job_id } = await r.json();
@@ -223,6 +233,9 @@
     // Transcript
     renderTranscript(job.transcript);
 
+    // Scoring results
+    renderScoring(job);
+
     // Clips — playable + downloadable
     renderClips(jobId, job.clips || []);
 
@@ -234,6 +247,51 @@
     // Show/hide regenerate button
     $('regenerate-btn').style.display = job.transcript ? 'block' : 'none';
     $('detail-progress').classList.add('hidden');
+  }
+
+  function renderScoring(job) {
+    const section = $('scoring-section');
+    const windows = job.windows || [];
+    if (!windows.length) { section.classList.add('hidden'); return; }
+    section.classList.remove('hidden');
+
+    // Meta row: engine used, count, warning
+    const isReal   = job.clips?.some(c => c.hook);
+    const engine   = isReal ? 'Multi-Signal (OpenAI + Audio + Dialogue)' : 'Stub (equal-time windows)';
+    const warning  = job.scorer_warning
+      ? `<div class="scoring-warning">⚡ ${escHtml(job.scorer_warning)}</div>` : '';
+
+    $('scoring-meta').innerHTML = `
+      <div class="scoring-meta-row">
+        <span class="scoring-engine ${isReal ? 'engine-real' : 'engine-stub'}">${engine}</span>
+        <span class="scoring-badge">${windows.length} window${windows.length !== 1 ? 's' : ''} scored</span>
+      </div>
+      ${warning}`;
+
+    // Window rows
+    $('scoring-windows').innerHTML = windows.map((w, i) => {
+      const dur  = (w.end - w.start).toFixed(1);
+      const pct  = Math.round((w.score || 0) * 100);
+      const bar  = Math.max(4, pct);
+      const clip = job.clips?.find(c => Math.abs(c.start_sec - w.start) < 1);
+      const hook = clip?.hook ? `<div class="sw-hook">"${escHtml(clip.hook)}"</div>` : '';
+      const eng  = clip?.engagement_type ? `<span class="eng-badge">${clip.engagement_type}</span>` : '';
+      return `
+        <div class="scoring-window">
+          <div class="sw-rank">#${i + 1}</div>
+          <div class="sw-info">
+            <div class="sw-top">
+              <span class="sw-time">${fmtTime(w.start)} – ${fmtTime(w.end)} · ${dur}s</span>
+              ${eng}
+            </div>
+            ${hook}
+          </div>
+          <div class="sw-score-col">
+            <div class="sw-bar-track"><div class="sw-bar-fill" style="width:${bar}%"></div></div>
+            <span class="sw-score-num">${pct}%</span>
+          </div>
+        </div>`;
+    }).join('');
   }
 
   function renderTranscript(transcript) {
