@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shorts Auto-Clipping — Team Sprint Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f3ef;
+    --surface: #ffffff;
+    --surface2: #f0ede8;
+    --border: #ddd9d2;
+    --text: #1a1714;
+    --text2: #6b6560;
+    --text3: #b0aba4;
+    --p1: #0050cc;
+    --p1-bg: #eef4ff;
+    --p1-border: #c7d9ff;
+    --p2: #6200c9;
+    --p2-bg: #f5eeff;
+    --p2-border: #d9baff;
+    --p0: #d4000f;
+    --p0-bg: #fff0f0;
+    --p1p: #b85c00;
+    --p1p-bg: #fff7ed;
+    --p2p: #157a3c;
+    --p2p-bg: #edfff4;
+    --sync: #5b21b6;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--text);
+    color: white;
+    padding: 60px 0 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: 'SPRINT';
+    position: absolute;
+    right: -20px; top: -20px;
+    font-family: var(--mono);
+    font-size: 160px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.03);
+    line-height: 1;
+    pointer-events: none;
+    letter-spacing: -0.05em;
+  }
+
+  .header-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  h1.title {
+    font-family: var(--mono);
+    font-size: clamp(22px, 3.5vw, 42px);
+    font-weight: 700;
+    line-height: 1.1;
+    color: white;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .header-sub {
+    color: rgba(255,255,255,0.5);
+    font-size: 14px;
+    font-weight: 300;
+    margin-bottom: 40px;
+  }
+
+  .team-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    max-width: 700px;
+  }
+
+  .team-card {
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 18px 20px;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .team-card-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .tc-p1 .team-card-name { color: #7eb8ff; }
+  .tc-p2 .team-card-name { color: #c4a0ff; }
+
+  .team-card-role {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.5;
+  }
+
+  /* NAV */
+  nav {
+    background: var(--surface);
+    border-bottom: 2px solid var(--text);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  nav .container {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  nav a {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text2);
+    text-decoration: none;
+    padding: 14px 18px;
+    border-right: 1px solid var(--border);
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+
+  nav a:hover { background: var(--text); color: white; }
+
+  /* MAIN */
+  main { padding: 56px 0 100px; }
+  section { margin-bottom: 72px; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  h2 {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 24px 0 12px;
+  }
+
+  p { color: var(--text2); margin-bottom: 12px; }
+
+  /* TIMELINE TABLE */
+  .timeline-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    background: var(--surface);
+  }
+
+  .timeline-table thead tr {
+    background: var(--text);
+    color: white;
+  }
+
+  .timeline-table thead th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 700;
+  }
+
+  .th-p1 { background: var(--p1); }
+  .th-p2 { background: var(--p2); }
+
+  .timeline-table tbody tr { border-bottom: 1px solid var(--border); }
+  .timeline-table tbody tr:hover { background: var(--surface2); }
+
+  .timeline-table tbody td {
+    padding: 10px 14px;
+    color: var(--text2);
+    vertical-align: top;
+  }
+
+  .phase-cell {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .time-cell {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text3);
+    white-space: nowrap;
+  }
+
+  .p1-cell { color: var(--p1); background: rgba(0,80,204,0.03); }
+  .p2-cell { color: var(--p2); background: rgba(98,0,201,0.03); }
+
+  .sync-row td { background: #fafaf5; border-top: 2px solid #e8c840; border-bottom: 2px solid #e8c840; }
+  .sync-row .phase-cell { color: #7a6400; }
+  .sync-row .time-cell { color: #7a6400; font-weight: 700; }
+  .sync-row .p1-cell, .sync-row .p2-cell { background: transparent; color: #7a6400; }
+
+  /* PERSON HEADER */
+  .person-header {
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    border: 2px solid;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .ph-p1 { border-color: var(--p1); background: var(--p1-bg); }
+  .ph-p2 { border-color: var(--p2); background: var(--p2-bg); }
+
+  .ph-name {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .ph-p1 .ph-name { color: var(--p1); }
+  .ph-p2 .ph-name { color: var(--p2); }
+
+  .ph-role { font-size: 13px; color: var(--text2); }
+  .ph-stack { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-top: 6px; line-height: 1.6; }
+
+  /* PHASE LABEL */
+  .phase-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    display: inline-block;
+    margin-bottom: 16px;
+    border: 1px solid;
+  }
+
+  .pl-p1 { color: var(--p1); border-color: var(--p1-border); background: var(--p1-bg); }
+  .pl-p2 { color: var(--p2); border-color: var(--p2-border); background: var(--p2-bg); }
+
+  /* TASK CARD */
+  .task-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .task-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .priority-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    letter-spacing: 0.08em;
+  }
+
+  .pb-p0 { background: var(--p0-bg); color: var(--p0); border: 1px solid rgba(212,0,15,0.2); }
+  .pb-p1 { background: var(--p1p-bg); color: var(--p1p); border: 1px solid rgba(184,92,0,0.2); }
+  .pb-p2 { background: var(--p2p-bg); color: var(--p2p); border: 1px solid rgba(21,122,60,0.2); }
+
+  .task-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .task-time {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .task-body { padding: 14px 16px; }
+
+  .task-body ul { list-style: none; }
+  .task-body li {
+    padding: 5px 0 5px 18px;
+    position: relative;
+    color: var(--text2);
+    font-size: 13px;
+    line-height: 1.6;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .task-body li:last-child { border-bottom: none; }
+
+  .task-body li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 11px;
+    top: 6px;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--surface2);
+    color: var(--p1);
+    padding: 1px 5px;
+    border: 1px solid var(--border);
+  }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--text);
+    color: #a8d8ea;
+    padding: 16px 18px;
+    margin: 10px 0;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+
+  /* SYNC CHECKPOINT */
+  .sync-block {
+    border: 2px solid #e8c840;
+    background: #fffdf0;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+  }
+
+  .sync-header {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: #7a6400;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sync-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #e8c840;
+  }
+
+  .sync-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .sync-col-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  .sc-p1 { color: var(--p1); }
+  .sc-p2 { color: var(--p2); }
+
+  .sync-item {
+    font-size: 13px;
+    color: var(--text2);
+    padding: 5px 0;
+    border-bottom: 1px dashed var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .sync-item::before { content: '✓'; color: #7a6400; font-size: 11px; flex-shrink: 0; margin-top: 2px; }
+
+  /* CHECKLIST */
+  .checklist-section { margin-bottom: 28px; }
+  .checklist-group-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    margin-bottom: 10px;
+    display: inline-block;
+    border: 1px solid;
+    font-weight: 700;
+  }
+
+  .clg-p0 { color: var(--p0); border-color: rgba(212,0,15,0.3); background: var(--p0-bg); }
+  .clg-p1 { color: var(--p1p); border-color: rgba(184,92,0,0.3); background: var(--p1p-bg); }
+  .clg-p2 { color: var(--p2p); border-color: rgba(21,122,60,0.3); background: var(--p2p-bg); }
+
+  .check-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .check-item:first-of-type { border-top: 1px solid var(--border); }
+
+  .checkbox {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* CONTRACT */
+  .contract-block {
+    background: var(--text);
+    padding: 28px 32px;
+    margin-top: 20px;
+  }
+
+  .contract-block pre {
+    background: transparent;
+    color: #c4e8d4;
+    padding: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 20px;
+  }
+
+  .contract-block pre:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .contract-comment { color: rgba(255,255,255,0.3); }
+  .contract-fn { color: #7eb8ff; }
+  .contract-ret { color: #c4a0ff; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: var(--text); color: white; }
+  thead th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 14px; text-align: left; }
+  tbody tr { border-bottom: 1px solid var(--border); background: var(--surface); }
+  tbody tr:hover { background: var(--surface2); }
+  tbody td { padding: 10px 14px; color: var(--text2); }
+  tbody td:first-child { color: var(--text); font-weight: 500; }
+
+  /* FOOTER */
+  footer {
+    background: var(--text);
+    color: rgba(255,255,255,0.3);
+    padding: 32px 0;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .animate { animation: fadeIn 0.4s ease forwards; }
+
+  @media (max-width: 700px) {
+    .team-cards, .sync-grid { grid-template-columns: 1fr; }
+    .container { padding: 0 16px; }
+    h1.title { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-eyebrow animate">Shorts Auto-Clipping System</div>
+    <h1 class="title animate">TEAM SPRINT PLAN</h1>
+    <p class="header-sub animate">24-Hour Hackathon · 2 Members · Build → Review → Ship</p>
+    <div class="team-cards animate">
+      <div class="team-card tc-p1">
+        <div class="team-card-name">⚙ Person 1 — Backend</div>
+        <div class="team-card-role">FastAPI · Celery · Redis<br>yt-dlp · Storage · API Layer</div>
+      </div>
+      <div class="team-card tc-p2">
+        <div class="team-card-name">🧠 Person 2 — AI/Pipeline</div>
+        <div class="team-card-role">Claude Haiku · librosa · pyannote<br>MediaPipe · FFmpeg · Scoring</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="container">
+    <a href="#timeline">Timeline</a>
+    <a href="#person1">Person 1</a>
+    <a href="#person2">Person 2</a>
+    <a href="#syncs">Syncs</a>
+    <a href="#checklist">Checklist</a>
+    <a href="#contract">Contract</a>
+  </div>
+</nav>
+
+<main>
+<div class="container">
+
+<!-- TIMELINE -->
+<section id="timeline">
+  <div class="section-label">Master Timeline</div>
+  <h2>24-Hour Sprint — Hour by Hour</h2>
+  <p style="color:var(--text3); font-family:var(--mono); font-size:12px; margin-bottom:16px;">P0 = must ship &nbsp;·&nbsp; P1 = should ship &nbsp;·&nbsp; P2 = nice to have</p>
+  <div class="table-wrap">
+    <table class="timeline-table">
+      <thead>
+        <tr>
+          <th>Phase</th>
+          <th>Time</th>
+          <th class="th-p1">⚙ Person 1 — Backend</th>
+          <th class="th-p2">🧠 Person 2 — AI/Pipeline</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="phase-cell">Phase 0</td>
+          <td class="time-cell">Hr 0–1</td>
+          <td class="p1-cell">Project setup, env, Redis, FastAPI skeleton</td>
+          <td class="p2-cell">Install libs, test Supadata + Haiku API keys</td>
+        </tr>
+        <tr>
+          <td class="phase-cell">Phase 1</td>
+          <td class="time-cell">Hr 1–4</td>
+          <td class="p1-cell">yt-dlp downloader + metadata fetch + job queue</td>
+          <td class="p2-cell">Content classifier agent + transcript fetcher</td>
+        </tr>
+        <tr>
+          <td class="phase-cell">Phase 2</td>
+          <td class="time-cell">Hr 4–8</td>
+          <td class="p1-cell">Status API + storage layer + Celery task wiring</td>
+          <td class="p2-cell">Multi-signal scorer (Haiku + librosa + pyannote)</td>
+        </tr>
+        <tr>
+          <td class="phase-cell">Phase 3</td>
+          <td class="time-cell">Hr 8–12</td>
+          <td class="p1-cell">API integration + end-to-end smoke test</td>
+          <td class="p2-cell">FFmpeg clipper + reframer (MediaPipe/optical flow)</td>
+        </tr>
+        <tr class="sync-row">
+          <td class="phase-cell">⚡ SYNC #1</td>
+          <td class="time-cell">Hr 12</td>
+          <td class="p1-cell">Wire P1 + P2 together. Test full pipeline on 1 real YouTube URL.</td>
+          <td class="p2-cell">Wire P1 + P2 together. Test full pipeline on 1 real YouTube URL.</td>
+        </tr>
+        <tr>
+          <td class="phase-cell">Phase 4</td>
+          <td class="time-cell">Hr 12–16</td>
+          <td class="p1-cell">Error handling, edge cases, logging</td>
+          <td class="p2-cell">Subtitle burn + output packaging</td>
+        </tr>
+        <tr>
+          <td class="phase-cell">Phase 5</td>
+          <td class="time-cell">Hr 16–20</td>
+          <td class="p1-cell">Performance tuning + parallel download/transcript</td>
+          <td class="p2-cell">Clip quality review + scoring weight tuning</td>
+        </tr>
+        <tr class="sync-row">
+          <td class="phase-cell">⚡ SYNC #2</td>
+          <td class="time-cell">Hr 20</td>
+          <td class="p1-cell">Final integration + demo video test. Polish + edge case fixes.</td>
+          <td class="p2-cell">Final integration + demo video test. Polish + edge case fixes.</td>
+        </tr>
+        <tr>
+          <td class="phase-cell">Phase 6</td>
+          <td class="time-cell">Hr 20–23</td>
+          <td class="p1-cell">Deploy + staging test + load check</td>
+          <td class="p2-cell">Demo prep + backup test videos ready</td>
+        </tr>
+        <tr>
+          <td class="phase-cell">Buffer</td>
+          <td class="time-cell">Hr 23–24</td>
+          <td class="p1-cell">Bug fixes only</td>
+          <td class="p2-cell">Bug fixes only</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PERSON 1 -->
+<section id="person1">
+  <div class="section-label">Person 1 — Backend Engineer</div>
+  <div class="person-header ph-p1">
+    <div>
+      <div class="ph-name">⚙ Person 1 — Backend Engineer</div>
+      <div class="ph-role">You own everything from the HTTP boundary inward — request handling, job queuing, storage, and the glue that connects the AI pipeline to the outside world.</div>
+      <div class="ph-stack">FastAPI · Celery · Redis · yt-dlp · Storage · API Layer · Pydantic</div>
+    </div>
+  </div>
+
+  <div class="phase-label pl-p1">Phase 0 — Setup · Hr 0–1</div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Project Bootstrap</span>
+      <span class="task-time">45 min</span>
+    </div>
+    <div class="task-body"><ul>
+      <li>Create repo, agree on branch naming (main, dev, feat/xxx)</li>
+      <li>Set up virtualenv, install FastAPI + uvicorn + celery + redis</li>
+      <li>Create <code>config.py</code> with all API key slots (Anthropic, Supadata)</li>
+      <li>Verify Redis running locally or on cloud</li>
+      <li>Create shared <code>models.py</code> — JobRequest, JobStatus, ClipResult Pydantic models</li>
+    </ul></div>
+  </div>
+
+  <div class="phase-label pl-p1">Phase 1 — Core Backend · Hr 1–4</div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">yt-dlp Metadata Fetcher</span>
+      <span class="task-time">45 min</span>
+    </div>
+    <div class="task-body"><ul>
+      <li><code>downloader.py</code>: <code>get_metadata(url)</code> → returns title, duration, chapters, auto_caption_available</li>
+      <li>No download yet — <code>skip_download=True</code> mode only</li>
+      <li>Return clean dict, handle private/unavailable video errors gracefully</li>
+      <li>Test with 3 URLs: podcast, music, sports</li>
+    </ul></div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">yt-dlp Video Downloader</span>
+      <span class="task-time">60 min</span>
+    </div>
+    <div class="task-body"><ul>
+      <li><code>download_video(url, output_path, quality='720')</code> → returns local file path</li>
+      <li>Format: <code>bestvideo[height&lt;=720][ext=mp4]+bestaudio[ext=m4a]</code></li>
+      <li>Progress hook → write percentage to Redis key for status polling</li>
+      <li>Handle rate limits + retry logic (max 3 attempts)</li>
+      <li>Test download times for 5min, 15min, 30min videos — log actual numbers</li>
+    </ul></div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Job Queue (Celery + Redis)</span>
+      <span class="task-time">75 min</span>
+    </div>
+    <div class="task-body"><ul>
+      <li><code>tasks.py</code>: <code>process_video_task(job_id, url)</code> — main Celery task</li>
+      <li>Stages: <code>QUEUED → DOWNLOADING → TRANSCRIBING → SCORING → CLIPPING → REFRAMING → SUBTITLES → DONE → FAILED</code></li>
+      <li><code>update_job_stage(job_id, stage, progress_pct)</code> → writes to Redis</li>
+      <li>Store job metadata in Redis as JSON (created_at, url, stage, clips list)</li>
+      <li>Test: submit job, verify stage transitions in Redis</li>
+    </ul></div>
+  </div>
+
+  <div class="phase-label pl-p1">Phase 2 — API Layer · Hr 4–8</div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">FastAPI Endpoints</span>
+      <span class="task-time">90 min</span>
+    </div>
+    <div class="task-body"><ul>
+      <li><code>POST /api/process</code> — validate URL, create job_id (uuid4), enqueue Celery task, return job_id</li>
+      <li><code>GET /api/status/{job_id}</code> — return stage + progress_pct + estimated_time_remaining</li>
+      <li><code>GET /api/result/{job_id}</code> — return clip list with download URLs (only if DONE)</li>
+      <li><code>GET /api/clip/{job_id}/{clip_n}</code> — stream MP4 file with range request support</li>
+      <li><code>POST /api/classify</code> — metadata-only classification (no download), returns content_type</li>
+      <li>Add CORS middleware for frontend</li>
+    </ul></div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Storage Layer</span>
+      <span class="task-time">45 min</span>
+    </div>
+    <div class="task-body"><ul>
+      <li><code>storage.py</code>: <code>get_job_dir(job_id)</code> → <code>/tmp/jobs/{job_id}/</code></li>
+      <li>Subdirs: <code>/raw</code> (video), <code>/clips</code> (cut), <code>/output</code> (final subtitled)</li>
+      <li><code>cleanup_job(job_id)</code> → delete after 2 hours (Redis TTL)</li>
+      <li>List job clips → returns {clip_n, duration, file_size, download_url}</li>
+    </ul></div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Parallel Execution in Task</span>
+      <span class="task-time">30 min</span>
+    </div>
+    <div class="task-body"><ul>
+      <li>In <code>process_video_task</code>: run download + transcript fetch concurrently</li>
+      <li>Use <code>asyncio.gather</code> or <code>ThreadPoolExecutor</code> with 2 workers</li>
+      <li>Transcript returns fast — don't block download on it</li>
+      <li>Once both done, proceed to scoring stage</li>
+    </ul></div>
+  </div>
+
+  <div class="phase-label pl-p1">Phase 3 — Integration · Hr 8–12</div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Wire Pipeline Stages</span>
+      <span class="task-time">90 min</span>
+    </div>
+    <div class="task-body">
+      <ul>
+        <li>Connect Person 2's modules into Celery task in correct order</li>
+        <li>Update job stage at each step — keep status polling accurate</li>
+      </ul>
+      <pre>classifier.classify(metadata)           → content_type
+transcript.fetch(url, content_type)     → timestamped segments
+scorer.score(transcript, audio, type)   → top windows
+clipper.cut(video_path, windows)        → clip file paths
+reframer.reframe(clips, content_type)   → reframed paths
+subtitles.burn(clips, transcript)       → final output paths</pre>
+    </div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Smoke Test — End to End</span>
+      <span class="task-time">45 min</span>
+    </div>
+    <div class="task-body"><ul>
+      <li>Submit 15-min podcast YouTube URL via <code>POST /api/process</code></li>
+      <li>Poll status every 3 sec, verify all stage transitions in order</li>
+      <li>Download final clips, verify 9:16 ratio, subtitles visible, audio intact</li>
+      <li>Log total wall-clock time — target under 5 min</li>
+    </ul></div>
+  </div>
+
+  <div class="phase-label pl-p1">Phase 4 — Error Handling · Hr 12–16</div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p1">P1</span>
+      <span class="task-title">Edge Case Handling</span>
+      <span class="task-time">60 min</span>
+    </div>
+    <div class="task-body"><ul>
+      <li>Private/unavailable video → 400 error with clear message</li>
+      <li>Video &lt; 2 min → reject at intake with message</li>
+      <li>Supadata returns empty → trigger fallback flag for Person 2's whisper path</li>
+      <li>Any pipeline stage fails → mark job FAILED, store error in Redis</li>
+      <li>Duplicate URL submitted → return existing job_id if still processing</li>
+    </ul></div>
+  </div>
+
+  <div class="phase-label pl-p1">Phase 5 — Performance · Hr 16–20</div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p1">P1</span>
+      <span class="task-title">Optimization</span>
+      <span class="task-time">60 min</span>
+    </div>
+    <div class="task-body"><ul>
+      <li>Profile actual stage times on 30-min video, identify bottleneck</li>
+      <li>Confirm download + transcript are truly parallel (check logs)</li>
+      <li>If reframing is slow: process clips in parallel (ThreadPoolExecutor)</li>
+      <li>Add <code>estimated_time_remaining</code> to status response based on video duration</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- PERSON 2 -->
+<section id="person2">
+  <div class="section-label">Person 2 — AI / Pipeline Engineer</div>
+  <div class="person-header ph-p2">
+    <div>
+      <div class="ph-name">🧠 Person 2 — AI / Pipeline Engineer</div>
+      <div class="ph-role">You own the intelligence and media processing — classification, transcript, all scoring signals, video reframing, and subtitle output. You hand Person 1 clean Python functions.</div>
+      <div class="ph-stack">Claude Haiku · librosa · pyannote.audio · MediaPipe · OpenCV · ffmpeg-python</div>
+    </div>
+  </div>
+
+  <div class="phase-label pl-p2">Phase 0 — Setup · Hr 0–1</div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Environment & API Validation</span>
+      <span class="task-time">45 min</span>
+    </div>
+    <div class="task-body">
+      <ul>
+        <li>Test Supadata API: fetch transcript for known YouTube URL, verify timestamp format</li>
+        <li>Test Claude Haiku: send test prompt, verify JSON response parsing works</li>
+        <li>Test faster-whisper: transcribe 30-sec audio clip locally</li>
+        <li>Verify ffmpeg installed and accessible in PATH</li>
+      </ul>
+      <pre>pip install anthropic librosa pyannote.audio mediapipe \
+    opencv-python ffmpeg-python scenedetect faster-whisper</pre>
+    </div>
+  </div>
+
+  <div class="phase-label pl-p2">Phase 1 — Classifier + Transcript · Hr 1–4</div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Content Classifier Agent</span>
+      <span class="task-time">60 min</span>
+    </div>
+    <div class="task-body"><ul>
+      <li><code>classifier.py</code>: <code>classify(metadata_dict)</code> → content_type string</li>
+      <li>Send title + description + tags to Claude Haiku</li>
+      <li>Prompt: return ONLY one of: <code>podcast_interview | music_lyrics | music_instrumental | sports_action | mute_broll</code></li>
+      <li>Parse response, validate against enum, default to <code>podcast_interview</code> on parse fail</li>
+      <li>Fallback: if duration &lt; 120 sec → return <code>'too_short'</code> error</li>
+    </ul></div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Transcript Fetcher</span>
+      <span class="task-time">60 min</span>
+    </div>
+    <div class="task-body"><ul>
+      <li><code>transcript.py</code>: <code>fetch(url, content_type, audio_path=None)</code> → list of <code>{start, end, text}</code> dicts</li>
+      <li>Primary: Supadata API call with YouTube URL → parse to standard format</li>
+      <li>Fallback: if Supadata empty OR content_type is <code>music_lyrics</code> → run faster-whisper</li>
+      <li>Audio extraction first: <code>ffmpeg -i video.mp4 -vn -acodec pcm_s16le -ar 16000 audio.wav</code></li>
+      <li>Normalize both outputs to same <code>{start, end, text}</code> schema</li>
+    </ul></div>
+  </div>
+
+  <div class="phase-label pl-p2">Phase 2 — Scoring Signals · Hr 4–8</div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Signal 1 — Semantic (Claude Haiku)</span>
+      <span class="task-time">75 min</span>
+    </div>
+    <div class="task-body">
+      <ul>
+        <li>Group transcript segments into 30s windows with timestamps</li>
+        <li>Parse JSON response — strip markdown fences before <code>json.loads()</code></li>
+        <li>Validate all fields present, scores in 0–1 range</li>
+      </ul>
+      <pre>prompt = """Given this timestamped transcript, identify the top 5
+most engaging 30-60 second windows. Return JSON array:
+[{"start_sec": 0, "end_sec": 45, "score": 0.92, "reason": "..."}]
+Return JSON only, no markdown fences."""</pre>
+    </div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Signal 2 — Audio Energy (librosa)</span>
+      <span class="task-time">60 min</span>
+    </div>
+    <div class="task-body">
+      <ul>
+        <li><code>get_energy_scores(audio_path)</code> → dict of <code>{second: energy_score}</code></li>
+        <li>For music: also compute <code>onset_strength</code> for drop detection</li>
+      </ul>
+      <pre>y, sr = librosa.load(audio_path, sr=22050)
+rms = librosa.feature.rms(y=y, frame_length=sr//2, hop_length=sr//2)
+# Normalize to 0-1. Aggregate per 30s window: mean(energy[start:end])</pre>
+    </div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Signal 3 — Speaker Turns (pyannote)</span>
+      <span class="task-time">60 min</span>
+    </div>
+    <div class="task-body">
+      <ul>
+        <li><code>get_speaker_density(audio_path)</code> → dict of <code>{window_start: density_score}</code></li>
+        <li>⚠️ Requires HuggingFace token — set up BEFORE hackathon</li>
+      </ul>
+      <pre>pipeline = Pipeline.from_pretrained('pyannote/speaker-diarization')
+# Count speaker switches per 30s window
+# Normalize: max switches in any window = 1.0</pre>
+    </div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Score Combiner</span>
+      <span class="task-time">30 min</span>
+    </div>
+    <div class="task-body">
+      <ul>
+        <li>Select top 3–5 windows, enforce min 10-sec gap between selections</li>
+        <li>Snap window edges to nearest sentence boundary from transcript</li>
+      </ul>
+      <pre># podcast_interview:
+score = (0.40 × semantic) + (0.35 × energy) + (0.25 × dialogue)
+# music_instrumental:
+score = (0.00 × semantic) + (0.70 × energy) + (0.30 × onset)
+# sports_action:
+score = (0.20 × semantic) + (0.50 × motion) + (0.30 × energy)</pre>
+    </div>
+  </div>
+
+  <div class="phase-label pl-p2">Phase 3 — Clipper + Reframer · Hr 8–12</div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">FFmpeg Clipper</span>
+      <span class="task-time">45 min</span>
+    </div>
+    <div class="task-body">
+      <ul>
+        <li>Stream copy first (no re-encode) for speed</li>
+        <li>Fallback if AV sync issues: <code>-c:v libx264 -crf 23 -c:a aac</code></li>
+        <li>Name clips: <code>clip_001.mp4</code>, <code>clip_002.mp4</code> (score desc)</li>
+      </ul>
+      <pre>ffmpeg -ss {start} -i video -t {duration} -c copy clip.mp4</pre>
+    </div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">Reframer — MediaPipe Face Tracking</span>
+      <span class="task-time">90 min</span>
+    </div>
+    <div class="task-body">
+      <ul>
+        <li>Per frame: run FaceDetection → get bbox center → smooth with <code>deque(maxlen=30)</code></li>
+        <li>If no face: use frame center as fallback</li>
+        <li>Crop: <code>width = frame_height * (9/16)</code>, centered on smoothed_x</li>
+        <li>Merge audio back after reframe with ffmpeg</li>
+      </ul>
+      <pre>mp_face = mp.solutions.face_detection.FaceDetection(min_detection_confidence=0.5)
+# Boundary clamp: crop_x = max(0, min(crop_x, max_x))
+# ffmpeg -i reframed.mp4 -i original.mp4 -map 0:v -map 1:a -c:a copy final.mp4</pre>
+    </div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p1">P1</span>
+      <span class="task-title">Reframer — Optical Flow (Sports)</span>
+      <span class="task-time">45 min</span>
+    </div>
+    <div class="task-body">
+      <ul><li>Same 30-frame smoothing as MediaPipe path</li></ul>
+      <pre>flow = cv2.calcOpticalFlowFarneback(prev_gray, curr_gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+mag, _ = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+# Weighted centroid of high-magnitude regions = crop target</pre>
+    </div>
+  </div>
+
+  <div class="phase-label pl-p2">Phase 4 — Subtitles · Hr 12–16</div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="priority-badge pb-p0">P0</span>
+      <span class="task-title">SRT Generator + Subtitle Burn</span>
+      <span class="task-time">60 min</span>
+    </div>
+    <div class="task-body">
+      <ul>
+        <li>Offset all timestamps by <code>-clip_start_sec</code> to make relative to clip</li>
+        <li>Format: <code>00:00:05,000 --> 00:00:08,000</code></li>
+        <li>Verify timing on 3 test clips before done</li>
+      </ul>
+      <pre>ffmpeg -i clip.mp4 \
+  -vf "subtitles=clip.srt:force_style='FontSize=24,Bold=1,\
+PrimaryColour=&amp;HFFFFFF,OutlineColour=&amp;H000000,Outline=2,Alignment=2'" \
+  -c:a copy output_final.mp4</pre>
+    </div>
+  </div>
+</section>
+
+<!-- SYNCS -->
+<section id="syncs">
+  <div class="section-label">Sync Checkpoints</div>
+  <h2>Two Mandatory Team Syncs</h2>
+  <p>Don't skip these — they prevent 4 hours of debugging integration issues.</p>
+
+  <div class="sync-block">
+    <div class="sync-header">
+      <div class="sync-dot"></div>
+      SYNC #1 — HOUR 12 — INTEGRATION CHECKPOINT
+    </div>
+    <div class="sync-grid">
+      <div>
+        <div class="sync-col-label sc-p1">⚙ Person 1 brings</div>
+        <div class="sync-item">Working POST /api/process + job queue + storage</div>
+        <div class="sync-item">Status polling working in terminal</div>
+        <div class="sync-item">All Celery stages defined with update hooks</div>
+      </div>
+      <div>
+        <div class="sync-col-label sc-p2">🧠 Person 2 brings</div>
+        <div class="sync-item">classify(), fetch_transcript(), score() all callable</div>
+        <div class="sync-item">cut_clips() working on a test video</div>
+        <div class="sync-item">reframe() working on a test clip</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sync-block">
+    <div class="sync-header">
+      <div class="sync-dot"></div>
+      SYNC #2 — HOUR 20 — FINAL INTEGRATION
+    </div>
+    <div class="sync-grid">
+      <div>
+        <div class="sync-col-label sc-p1">⚙ Person 1 brings</div>
+        <div class="sync-item">Full pipeline integrated, all endpoints working</div>
+        <div class="sync-item">2 real test videos processed end-to-end</div>
+        <div class="sync-item">Error handling done, edge cases covered</div>
+      </div>
+      <div>
+        <div class="sync-col-label sc-p2">🧠 Person 2 brings</div>
+        <div class="sync-item">Subtitles burning correctly, clips watchable</div>
+        <div class="sync-item">Demo video ready + backup pre-processed clips</div>
+        <div class="sync-item">Scoring weights tuned on real content</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHECKLIST -->
+<section id="checklist">
+  <div class="section-label">Demo Day</div>
+  <h2>Pre-Presentation Checklist</h2>
+
+  <div class="checklist-section">
+    <div class="checklist-group-label clg-p0">P0 — Must Have</div>
+    <div class="check-item"><div class="checkbox"></div>Full pipeline runs on a 15-min podcast URL end to end</div>
+    <div class="check-item"><div class="checkbox"></div>At least 3 clips output, all in 9:16 ratio</div>
+    <div class="check-item"><div class="checkbox"></div>Subtitles visible and correctly timed</div>
+    <div class="check-item"><div class="checkbox"></div>Status polling shows real progress stages</div>
+    <div class="check-item"><div class="checkbox"></div>Pre-processed demo backup clips ready (in case of live failure)</div>
+    <div class="check-item"><div class="checkbox"></div>API responds in under 500ms for /status endpoint</div>
+  </div>
+
+  <div class="checklist-section">
+    <div class="checklist-group-label clg-p1">P1 — Should Have</div>
+    <div class="check-item"><div class="checkbox"></div>Two content types working (podcast + one more)</div>
+    <div class="check-item"><div class="checkbox"></div>Error message shown for private video URL</div>
+    <div class="check-item"><div class="checkbox"></div>Reframing smooth (no jitter) on podcast clip</div>
+    <div class="check-item"><div class="checkbox"></div>Clip scoring reason visible in result</div>
+  </div>
+
+  <div class="checklist-section">
+    <div class="checklist-group-label clg-p2">P2 — Nice to Have</div>
+    <div class="check-item"><div class="checkbox"></div>Music with lyrics content type working</div>
+    <div class="check-item"><div class="checkbox"></div>Sports/action optical flow reframing</div>
+    <div class="check-item"><div class="checkbox"></div>Sentence-transformer semantic matching</div>
+  </div>
+</section>
+
+<!-- CONTRACT -->
+<section id="contract">
+  <div class="section-label">Interface Contract</div>
+  <h2>Agree on These at Hour 0</h2>
+  <p>These are the exact function signatures Person 1 expects from Person 2's modules. Lock these in and don't change without telling each other.</p>
+
+  <div class="contract-block">
+    <pre><span class="contract-comment"># classifier.py</span>
+<span class="contract-fn">def classify</span>(metadata: dict) -> str:
+    <span class="contract-ret"># Returns: 'podcast_interview' | 'music_lyrics' | 'music_instrumental' | 'sports_action' | 'mute_broll'</span></pre>
+
+    <pre><span class="contract-comment"># transcript.py</span>
+<span class="contract-fn">def fetch</span>(url: str, content_type: str, audio_path: str = None) -> list[dict]:
+    <span class="contract-ret"># Returns: [{'start': float, 'end': float, 'text': str}, ...]</span></pre>
+
+    <pre><span class="contract-comment"># scorer.py</span>
+<span class="contract-fn">def score</span>(segments: list[dict], audio_path: str, content_type: str) -> list[dict]:
+    <span class="contract-ret"># Returns: [{'start': float, 'end': float, 'score': float, 'reason': str}, ...]</span></pre>
+
+    <pre><span class="contract-comment"># clipper.py</span>
+<span class="contract-fn">def cut_clips</span>(video_path: str, windows: list[dict], output_dir: str) -> list[str]:
+    <span class="contract-ret"># Returns: list of absolute file paths to cut clips</span></pre>
+
+    <pre><span class="contract-comment"># reframer.py</span>
+<span class="contract-fn">def reframe_clip</span>(clip_path: str, content_type: str, output_path: str) -> str:
+    <span class="contract-ret"># Returns: output_path of reframed 9:16 clip</span></pre>
+
+    <pre><span class="contract-comment"># subtitles.py</span>
+<span class="contract-fn">def burn_subtitles</span>(clip_path: str, segments: list[dict], clip_start: float, output_path: str) -> str:
+    <span class="contract-ret"># Returns: output_path of final clip with subtitles burned in</span></pre>
+  </div>
+</section>
+
+</div>
+</main>
+
+<footer>
+  <div class="container">
+    SHORTS AUTO-CLIPPING · TEAM SPRINT PLAN · HACKATHON EDITION · SHIP IT.
+  </div>
+</footer>
+
+</body>
+</html>

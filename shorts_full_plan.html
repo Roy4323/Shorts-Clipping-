@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shorts Auto-Clipping — Technical Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --surface: #111318;
+    --surface2: #181c23;
+    --border: #1e2530;
+    --border2: #252d3a;
+    --accent: #00d4ff;
+    --accent2: #0066ff;
+    --green: #00e676;
+    --orange: #ff9800;
+    --purple: #b388ff;
+    --red: #ff5252;
+    --text: #e2e8f0;
+    --text2: #8892a4;
+    --text3: #4a5568;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* GRID BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    padding: 80px 0 60px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    top: -60px; right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(0,102,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .tag::before {
+    content: '';
+    display: inline-block;
+    width: 20px; height: 1px;
+    background: var(--accent);
+  }
+
+  h1.hero {
+    font-family: var(--mono);
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  h1.hero span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--text2);
+    margin-bottom: 40px;
+    font-weight: 300;
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 40px;
+    max-width: 700px;
+  }
+
+  .stat {
+    background: var(--surface);
+    padding: 20px 24px;
+  }
+
+  .stat-val {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--accent);
+    display: block;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    background: rgba(10,12,15,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    padding: 0;
+  }
+
+  nav .container {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  nav a {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text2);
+    text-decoration: none;
+    padding: 14px 20px;
+    border-right: 1px solid var(--border);
+    white-space: nowrap;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  nav a:hover { color: var(--accent); background: rgba(0,212,255,0.04); }
+  nav a:first-child { border-left: 1px solid var(--border); }
+
+  /* MAIN */
+  main { padding: 60px 0 120px; }
+
+  section { margin-bottom: 80px; }
+
+  /* SECTION HEADERS */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent2);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+  }
+
+  h2 {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 28px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  h3::before {
+    content: '▸';
+    color: var(--accent2);
+    font-size: 12px;
+  }
+
+  p { color: var(--text2); margin-bottom: 14px; line-height: 1.8; }
+
+  /* CALLOUT */
+  .callout {
+    background: rgba(0,212,255,0.04);
+    border: 1px solid rgba(0,212,255,0.15);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  .callout strong { color: var(--accent); font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; display: block; margin-bottom: 6px; }
+
+  /* CODE */
+  pre, code {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: var(--surface2);
+    color: #7dd3fc;
+  }
+
+  pre {
+    padding: 20px 24px;
+    border: 1px solid var(--border2);
+    overflow-x: auto;
+    margin: 16px 0;
+    line-height: 1.6;
+    position: relative;
+  }
+
+  pre::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: 10px; right: 14px;
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  code { padding: 2px 6px; border-radius: 2px; font-size: 13px; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead tr { background: var(--surface2); border-bottom: 2px solid var(--accent2); }
+
+  thead th {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text2);
+    padding: 12px 16px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+  tbody td {
+    padding: 12px 16px;
+    color: var(--text2);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  tbody td:first-child { color: var(--text); font-weight: 500; }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+
+  .badge-green { background: rgba(0,230,118,0.1); color: var(--green); border: 1px solid rgba(0,230,118,0.2); }
+  .badge-blue { background: rgba(0,212,255,0.1); color: var(--accent); border: 1px solid rgba(0,212,255,0.2); }
+  .badge-orange { background: rgba(255,152,0,0.1); color: var(--orange); border: 1px solid rgba(255,152,0,0.2); }
+
+  /* FLOW */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+  }
+
+  .flow-item {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 0;
+  }
+
+  .flow-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .flow-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    outline: 1px solid var(--accent);
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .flow-connector {
+    flex: 1;
+    width: 1px;
+    background: var(--border2);
+    margin: 4px 0;
+    min-height: 24px;
+  }
+
+  .flow-content {
+    padding: 0 0 24px 16px;
+  }
+
+  .flow-title {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .flow-desc {
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  /* SIGNAL CARDS */
+  .signal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  .signal-card {
+    background: var(--surface);
+    padding: 24px;
+  }
+
+  .signal-num {
+    font-family: var(--mono);
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--border2);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .signal-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .signal-desc {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  .signal-cost {
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.05em;
+  }
+
+  /* FOLDER TREE */
+  .tree {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    padding: 24px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 2;
+  }
+
+  .tree .dir { color: var(--accent); }
+  .tree .file { color: var(--text2); }
+  .tree .comment { color: var(--text3); }
+
+  /* ENDPOINT TABLE */
+  .endpoint { display: flex; align-items: center; gap: 10px; }
+  .method {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 2px;
+    min-width: 44px;
+    text-align: center;
+  }
+  .method-post { background: rgba(0,230,118,0.15); color: var(--green); }
+  .method-get { background: rgba(0,102,255,0.15); color: #60a5fa; }
+
+  /* SCORE FORMULA */
+  .formula {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--purple);
+    padding: 20px 24px;
+    font-family: var(--mono);
+    font-size: 15px;
+    color: var(--purple);
+    margin: 20px 0;
+    letter-spacing: 0.02em;
+  }
+
+  /* PERF TABLE */
+  .perf-val { color: var(--orange); font-family: var(--mono); font-size: 13px; }
+  .perf-total { color: var(--green); font-family: var(--mono); font-size: 13px; font-weight: 600; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 0;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate { animation: fadeUp 0.5s ease forwards; }
+  .animate:nth-child(2) { animation-delay: 0.05s; }
+  .animate:nth-child(3) { animation-delay: 0.1s; }
+
+  @media (max-width: 700px) {
+    .stat-row { grid-template-columns: 1fr; }
+    .signal-grid { grid-template-columns: 1fr; }
+    .container { padding: 0 20px; }
+    h1.hero { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="tag animate">Technical Architecture</div>
+    <h1 class="hero animate">SHORTS <span>AUTO-CLIPPING</span><br>SYSTEM</h1>
+    <p class="hero-sub animate">Complete Backend Architecture · Hackathon Edition · 2-Member Team</p>
+    <div class="stat-row animate">
+      <div class="stat">
+        <span class="stat-val">~$0.005</span>
+        <span class="stat-label">Cost per video</span>
+      </div>
+      <div class="stat">
+        <span class="stat-val">3–5 min</span>
+        <span class="stat-label">End-to-end (30 min video)</span>
+      </div>
+      <div class="stat">
+        <span class="stat-val">5 signals</span>
+        <span class="stat-label">Multi-modal detection</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="container">
+    <a href="#overview">01 Overview</a>
+    <a href="#stages">02 Stages</a>
+    <a href="#scoring">03 Scoring</a>
+    <a href="#reframing">04 Reframing</a>
+    <a href="#architecture">05 Architecture</a>
+    <a href="#performance">06 Performance</a>
+    <a href="#edge-cases">07 Edge Cases</a>
+    <a href="#requirements">08 Requirements</a>
+  </div>
+</nav>
+
+<main>
+<div class="container">
+
+<!-- SECTION 1: OVERVIEW -->
+<section id="overview">
+  <div class="section-label">01 — System Overview</div>
+  <h2>Design Philosophy</h2>
+  <div class="callout">
+    <strong>CORE PRINCIPLE</strong>
+    Never use vision models for highlight detection. Treat video as audio + text. Vision models are only invoked for reframing subject detection — using free local models (MediaPipe, OpenCV). Total API cost stays under $0.01 per video.
+  </div>
+
+  <p>The pipeline ingests a YouTube URL, downloads at optimal quality, extracts a transcript, runs multi-signal AI scoring to find the best highlight windows, reframes from 16:9 to 9:16 with subject-aware cropping, and burns subtitles — outputting ready-to-post short-form clips.</p>
+
+  <h3>High-Level Pipeline Flow</h3>
+  <div class="flow">
+    <div class="flow-item">
+      <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+      <div class="flow-content">
+        <div class="flow-title">Stage 1 — URL Intake & Metadata</div>
+        <div class="flow-desc">No download yet. yt-dlp metadata-only mode. Claude Haiku classifies content type. &lt;2 seconds.</div>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+      <div class="flow-content">
+        <div class="flow-title">Stage 2 — Parallel Download + Transcript</div>
+        <div class="flow-desc">yt-dlp (720p) and Supadata run concurrently. Transcript returns in seconds. Download is the long pole.</div>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+      <div class="flow-content">
+        <div class="flow-title">Stage 3 — Multi-Signal Highlight Scoring</div>
+        <div class="flow-desc">Semantic (Claude Haiku) + audio energy (librosa) + speaker turns (pyannote). Combined score per 30s window.</div>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+      <div class="flow-content">
+        <div class="flow-title">Stage 4 — Clip Windowing & Cutting</div>
+        <div class="flow-desc">Snap to sentence boundaries. Enforce 20–90s duration. FFmpeg stream copy — no re-encode.</div>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+      <div class="flow-content">
+        <div class="flow-title">Stage 5 — Reframing 16:9 → 9:16</div>
+        <div class="flow-desc">MediaPipe face tracking (podcast) / optical flow (sports) / smart center crop (fallback). 30-frame smoothing.</div>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-line"><div class="flow-dot" style="background:var(--green); outline-color:var(--green)"></div><div class="flow-connector" style="background:transparent"></div></div>
+      <div class="flow-content">
+        <div class="flow-title">Stage 6 — Subtitle Burn + Output</div>
+        <div class="flow-desc">SRT from transcript, offset to clip time, burned via ffmpeg. Bold white with black outline. Done.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Content Classification Routing</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Content Type</th>
+          <th>Detection</th>
+          <th>Highlight Signal</th>
+          <th>Reframe Strategy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Podcast / Interview</td><td>Metadata + speaker count</td><td>Semantic + speaker turns + energy</td><td>MediaPipe face tracking</td></tr>
+        <tr><td>Music with Lyrics</td><td>Metadata + Whisper confidence</td><td>Chorus detection via librosa</td><td>Center crop + beat-sync</td></tr>
+        <tr><td>Music Instrumental</td><td>Low transcript confidence</td><td>Energy drops + onset density</td><td>Motion center crop</td></tr>
+        <tr><td>Sports / Action</td><td>Metadata category</td><td>Optical flow motion scoring</td><td>Motion mass tracking</td></tr>
+        <tr><td>Mute / B-Roll</td><td>RMS energy &lt; threshold</td><td>PySceneDetect scene scoring</td><td>Visual-only + warn user</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- SECTION 2: STAGES -->
+<section id="stages">
+  <div class="section-label">02 — Stage Specs</div>
+  <h2>Stage-by-Stage Technical Spec</h2>
+
+  <h3>Stage 1 — URL Intake & Metadata</h3>
+  <p>Endpoint: <code>POST /api/process</code> — accepts YouTube URL only (no file upload in v1). Call yt-dlp in metadata-only mode immediately. Cost: ~$0.0002. Time: &lt;2 seconds.</p>
+  <pre data-lang="python">ydl_opts = {'skip_download': True, 'quiet': True}
+# Returns full info dict in &lt;1 second
+# Extract: title, description, tags, duration, chapters, auto_caption_available</pre>
+
+  <h3>Stage 2A — Video Download</h3>
+  <p>Always 720p max. 1080p/4K adds download time with zero benefit for short-form output.</p>
+  <pre data-lang="python">'format': 'bestvideo[height&lt;=720][ext=mp4]+bestaudio[ext=m4a]/best[height&lt;=720][ext=mp4]'</pre>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Video Length</th><th>Size</th><th>Download Time*</th><th>UX</th></tr></thead>
+      <tbody>
+        <tr><td>5 min</td><td>~150 MB</td><td class="perf-val">12–25 sec</td><td>Spinner</td></tr>
+        <tr><td>15 min</td><td>~450 MB</td><td class="perf-val">35–75 sec</td><td>Progress %</td></tr>
+        <tr><td>30 min</td><td>~900 MB</td><td class="perf-val">70–150 sec</td><td>Stage breakdown</td></tr>
+        <tr><td>60 min</td><td>~1.8 GB</td><td class="perf-val">2.5–5 min</td><td>Notify on complete</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12px; color:var(--text3)">* On 50–100 Mbps server bandwidth.</p>
+
+  <h3>Stage 2B — Transcript via Supadata</h3>
+  <p>YouTube URLs: Supadata pulls existing captions, returns timestamped segments in seconds — no transcription compute cost. Fallback for uploaded video (v2): extract audio → faster-whisper locally.</p>
+  <pre data-lang="python">ffmpeg -i video.mp4 -vn -acodec pcm_s16le -ar 16000 audio.wav
+
+model = WhisperModel('small', device='cpu', compute_type='int8')
+segments, _ = model.transcribe('audio.wav', word_timestamps=True)
+# ~0.3x real-time on CPU → 30min video ≈ 9min transcription</pre>
+
+  <h3>Stage 4 — Clip Cutting</h3>
+  <p>Snap window edges to sentence boundaries. Enforce 20–90s duration. Stream copy — no re-encode.</p>
+  <pre data-lang="bash">ffmpeg -ss {start} -i video.mp4 -t {duration} -c copy clip_{n}.mp4</pre>
+
+  <h3>Stage 6 — Subtitle Burn</h3>
+  <pre data-lang="bash">ffmpeg -i clip.mp4 \
+  -vf "subtitles=clip.srt:force_style='FontSize=24,Bold=1,\
+PrimaryColour=&amp;HFFFFFF,OutlineColour=&amp;H000000,Outline=2,Alignment=2'" \
+  -c:a copy output_final.mp4</pre>
+</section>
+
+<!-- SECTION 3: SCORING -->
+<section id="scoring">
+  <div class="section-label">03 — Highlight Scoring</div>
+  <h2>Multi-Signal Scoring Engine</h2>
+  <p>Three independent signals computed per 30-second window, combined into a composite score.</p>
+
+  <div class="signal-grid">
+    <div class="signal-card">
+      <div class="signal-num">01</div>
+      <div class="signal-title">Semantic Scoring</div>
+      <div class="signal-desc">Claude Haiku analyzes the full timestamped transcript. Returns top 5 engaging 30–60s windows with reasoning as JSON.</div>
+      <div class="signal-cost">~$0.003 / 1hr video · Weight: 40%</div>
+    </div>
+    <div class="signal-card">
+      <div class="signal-num">02</div>
+      <div class="signal-title">Audio Energy</div>
+      <div class="signal-desc">librosa RMS energy per 0.5s window. Detects laughter, applause, raised voice, emphasis. Runs locally.</div>
+      <div class="signal-cost">Free · Local · Weight: 35%</div>
+    </div>
+    <div class="signal-card">
+      <div class="signal-num">03</div>
+      <div class="signal-title">Speaker Turn Density</div>
+      <div class="signal-desc">pyannote.audio counts speaker switches per 30s window. High switch density = conversational energy = engaging.</div>
+      <div class="signal-cost">Free · Local · Weight: 25%</div>
+    </div>
+  </div>
+
+  <h3>Score Formula</h3>
+  <div class="formula">
+    score = (0.40 × semantic) + (0.35 × energy) + (0.25 × dialogue_density)
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Content Type</th><th>Semantic</th><th>Energy</th><th>Other</th></tr></thead>
+      <tbody>
+        <tr><td>Podcast / Interview</td><td>0.40</td><td>0.35</td><td>0.25 dialogue</td></tr>
+        <tr><td>Music Instrumental</td><td>0.00</td><td>0.70</td><td>0.30 onset</td></tr>
+        <tr><td>Sports / Action</td><td>0.20</td><td>0.30</td><td>0.50 motion</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <strong>BONUS SIGNAL</strong>
+    sentence-transformers: embed all transcript segments, find those semantically closest to the video's core topic. Most on-topic + high energy = best clip. Prevents off-topic tangents from being selected. Add if time allows.
+  </div>
+
+  <h3>Signal 1 — Semantic (Claude Haiku)</h3>
+  <pre data-lang="python"># Build windowed transcript: group segments into 30s windows
+# Prompt Haiku:
+prompt = """
+Given this timestamped transcript, identify the top 5 most engaging
+30-60 second windows. Return JSON only:
+[{"start_sec": 0, "end_sec": 45, "score": 0.92, "reason": "..."}]
+"""
+# Parse response — strip markdown fences before json.loads()</pre>
+
+  <h3>Signal 2 — Audio Energy (librosa)</h3>
+  <pre data-lang="python">y, sr = librosa.load(audio_path, sr=22050)
+rms = librosa.feature.rms(y=y, frame_length=sr//2, hop_length=sr//2)
+# Normalize to 0-1 with min-max
+# Aggregate per 30s window: mean(energy[window_start:window_end])</pre>
+
+  <h3>Signal 3 — Speaker Turns (pyannote)</h3>
+  <pre data-lang="python">from pyannote.audio import Pipeline
+pipeline = Pipeline.from_pretrained('pyannote/speaker-diarization')
+diarization = pipeline('audio.mp3')
+# Count speaker switches per 30s window
+# Normalize: max switches in any window = 1.0
+# ⚠ Requires HuggingFace token — set up BEFORE hackathon</pre>
+</section>
+
+<!-- SECTION 4: REFRAMING -->
+<section id="reframing">
+  <div class="section-label">04 — Reframing</div>
+  <h2>16:9 → 9:16 Subject-Aware Crop</h2>
+
+  <div class="callout">
+    <strong>CRITICAL SMOOTHING RULE</strong>
+    Raw per-frame crop coordinates produce unwatchable jitter. Always smooth with a rolling average of 24–30 frames before applying the crop. This single step is the difference between professional and amateur output.
+  </div>
+
+  <h3>Podcast / Interview — MediaPipe Face Tracking</h3>
+  <pre data-lang="python">import mediapipe as mp
+mp_face = mp.solutions.face_detection.FaceDetection(min_detection_confidence=0.5)
+
+# Per frame:
+# 1. Run FaceDetection → get bbox center (x, y)
+# 2. If no face: use frame center as fallback
+# 3. Smooth: rolling average over deque(maxlen=30)
+# 4. Crop: width = frame_height * (9/16), centered on smoothed_x
+# 5. Write to cv2.VideoWriter at same fps
+
+# Merge audio back:
+ffmpeg -i reframed_video.mp4 -i original.mp4 -map 0:v -map 1:a -c:a copy final.mp4</pre>
+
+  <h3>Sports / Action — Optical Flow Motion Center</h3>
+  <pre data-lang="python">flow = cv2.calcOpticalFlowFarneback(prev_gray, curr_gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+mag, ang = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+# Weighted centroid of high-magnitude regions = crop target
+# Apply same 30-frame smoothing as MediaPipe path</pre>
+
+  <h3>General Fallback — Smart Center Crop</h3>
+  <p>When no subject detected, apply center crop biased slightly upward. Subjects are rarely at the very bottom of frame. Safe for most content types.</p>
+</section>
+
+<!-- SECTION 5: ARCHITECTURE -->
+<section id="architecture">
+  <div class="section-label">05 — Backend Architecture</div>
+  <h2>Project Structure & API</h2>
+
+  <h3>Folder Structure</h3>
+  <div class="tree">
+    <div><span class="dir">shorts-clipper/</span></div>
+    <div>&nbsp;&nbsp;<span class="dir">api/</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">main.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># FastAPI app, routes</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">models.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Pydantic request/response models</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">tasks.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Celery task definitions</span></div>
+    <div>&nbsp;&nbsp;<span class="dir">pipeline/</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">classifier.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Content type classification</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">downloader.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># yt-dlp wrapper</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">transcript.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Supadata + Whisper fallback</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">scorer.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Multi-signal highlight scoring</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">clipper.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># FFmpeg clip cutting</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">reframer.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># 16:9 → 9:16 with subject tracking</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">subtitles.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># SRT generation + ffmpeg burn</span></div>
+    <div>&nbsp;&nbsp;<span class="dir">agents/</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">highlight_agent.py</span>&nbsp;&nbsp;<span class="comment"># Claude Haiku semantic scoring</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">classifier_agent.py</span>&nbsp;<span class="comment"># Claude Haiku classification</span></div>
+    <div>&nbsp;&nbsp;<span class="dir">utils/</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">audio.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># librosa helpers</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">ffmpeg_utils.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># ffmpeg command builders</span></div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">storage.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># output file management</span></div>
+    <div><span class="file">config.py</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># API keys, constants</span></div>
+    <div><span class="file">requirements.txt</span></div>
+  </div>
+
+  <h3>API Endpoints</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Endpoint</th><th>Method</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="endpoint"><span class="method method-post">POST</span><code>/api/process</code></div></td>
+          <td></td>
+          <td>Submit YouTube URL → returns job_id</td>
+        </tr>
+        <tr>
+          <td><div class="endpoint"><span class="method method-get">GET</span><code>/api/status/{job_id}</code></div></td>
+          <td></td>
+          <td>Poll stage + progress % + time estimate</td>
+        </tr>
+        <tr>
+          <td><div class="endpoint"><span class="method method-get">GET</span><code>/api/result/{job_id}</code></div></td>
+          <td></td>
+          <td>Fetch completed clips list + download URLs</td>
+        </tr>
+        <tr>
+          <td><div class="endpoint"><span class="method method-get">GET</span><code>/api/clip/{job_id}/{n}</code></div></td>
+          <td></td>
+          <td>Stream individual clip file (range request)</td>
+        </tr>
+        <tr>
+          <td><div class="endpoint"><span class="method method-post">POST</span><code>/api/classify</code></div></td>
+          <td></td>
+          <td>Metadata-only classification (no download)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Job Stage Progression</h3>
+  <pre data-lang="redis">queued → downloading → transcribing → scoring → clipping → reframing → subtitles → done
+                                                                                    ↓
+                                                                                 FAILED (on any error)</pre>
+
+  <h3>Tech Stack</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Layer</th><th>Technology</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td>API Framework</td><td><span class="badge badge-blue">FastAPI</span></td><td>Async, fast, auto-docs</td></tr>
+        <tr><td>Task Queue</td><td><span class="badge badge-blue">Celery + Redis</span></td><td>Async video processing jobs</td></tr>
+        <tr><td>Video Download</td><td><span class="badge badge-blue">yt-dlp</span></td><td>Best YouTube support, no alternative</td></tr>
+        <tr><td>Transcript</td><td><span class="badge badge-blue">Supadata API</span></td><td>Instant for YouTube, no compute</td></tr>
+        <tr><td>Transcription (v2)</td><td><span class="badge badge-green">faster-whisper</span></td><td>4x faster than openai-whisper, free</td></tr>
+        <tr><td>Audio Analysis</td><td><span class="badge badge-green">librosa</span></td><td>Energy, tempo, onset detection</td></tr>
+        <tr><td>Speaker Detection</td><td><span class="badge badge-green">pyannote.audio</span></td><td>Free, local, accurate diarization</td></tr>
+        <tr><td>AI Scoring</td><td><span class="badge badge-orange">Claude Haiku</span></td><td>&lt;$0.003/video, fastest capable model</td></tr>
+        <tr><td>Face Tracking</td><td><span class="badge badge-green">MediaPipe</span></td><td>Google, free, real-time, local</td></tr>
+        <tr><td>Motion Tracking</td><td><span class="badge badge-green">OpenCV</span></td><td>Free, fast, no model needed</td></tr>
+        <tr><td>Video Processing</td><td><span class="badge badge-green">ffmpeg-python</span></td><td>Industry standard, free</td></tr>
+        <tr><td>Scene Detection</td><td><span class="badge badge-green">PySceneDetect</span></td><td>Fast local scene boundary detection</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- SECTION 6: PERFORMANCE -->
+<section id="performance">
+  <div class="section-label">06 — Performance</div>
+  <h2>Cost & Timing Targets</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Video Length</th><th>Download</th><th>Scoring</th><th>Reframe/Render</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr><td>5 min</td><td class="perf-val">~20 sec</td><td class="perf-val">~15 sec</td><td class="perf-val">~30 sec</td><td class="perf-total">~65 sec</td></tr>
+        <tr><td>15 min</td><td class="perf-val">~55 sec</td><td class="perf-val">~20 sec</td><td class="perf-val">~60 sec</td><td class="perf-total">~2.5 min</td></tr>
+        <tr><td>30 min</td><td class="perf-val">~110 sec</td><td class="perf-val">~30 sec</td><td class="perf-val">~90 sec</td><td class="perf-total">~4 min</td></tr>
+        <tr><td>60 min</td><td class="perf-val">~4 min</td><td class="perf-val">~45 sec</td><td class="perf-val">~3 min</td><td class="perf-total">~8 min</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <strong>COST BREAKDOWN PER VIDEO</strong>
+    Claude Haiku classify: ~$0.0002 + Claude Haiku scoring: ~$0.003 = ~$0.003 total API cost. All other processing (librosa, pyannote, MediaPipe, OpenCV, ffmpeg) is local compute at zero cost. Confirm Supadata free tier limits before hackathon.
+  </div>
+</section>
+
+<!-- SECTION 7: EDGE CASES -->
+<section id="edge-cases">
+  <div class="section-label">07 — Edge Cases</div>
+  <h2>Graceful Failure Handling</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Scenario</th><th>Detection</th><th>Handling</th></tr></thead>
+      <tbody>
+        <tr><td>No transcript available</td><td>Supadata returns empty</td><td>Fall back to faster-whisper on audio</td></tr>
+        <tr><td>Silent / mute video</td><td>RMS energy &lt; 0.01 threshold</td><td>Visual-only mode, warn user</td></tr>
+        <tr><td>Music only (no lyrics)</td><td>Low Whisper word confidence</td><td>librosa-only scoring, skip semantic</td></tr>
+        <tr><td>No face detected</td><td>MediaPipe returns no bbox</td><td>Fall back to smart center crop</td></tr>
+        <tr><td>Video too short (&lt;2 min)</td><td>Duration check at intake</td><td>Return 400 error at URL submission</td></tr>
+        <tr><td>Private / age-gated</td><td>yt-dlp error code</td><td>Return user-friendly error message</td></tr>
+        <tr><td>Windows overlap</td><td>Clip selection logic</td><td>Enforce 10-sec minimum gap</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- SECTION 8: REQUIREMENTS -->
+<section id="requirements">
+  <div class="section-label">08 — Requirements</div>
+  <h2>requirements.txt</h2>
+  <pre data-lang="pip">fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+celery[redis]>=5.3.0
+yt-dlp>=2024.3.10
+faster-whisper>=0.10.0
+librosa>=0.10.0
+pyannote.audio>=3.1.0
+mediapipe>=0.10.0
+opencv-python>=4.9.0
+ffmpeg-python>=0.2.0
+scenedetect>=0.6.3
+sentence-transformers>=2.6.0
+anthropic>=0.20.0
+httpx>=0.26.0
+pydantic>=2.6.0
+redis>=5.0.0
+python-multipart>=0.0.9</pre>
+</section>
+
+</div>
+</main>
+
+<footer>
+  <div class="container">
+    SHORTS AUTO-CLIPPING SYSTEM · TECHNICAL ARCHITECTURE · HACKATHON EDITION
+  </div>
+</footer>
+
+</body>
+</html>
