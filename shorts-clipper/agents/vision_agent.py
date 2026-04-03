@@ -4,13 +4,10 @@ import subprocess
 import time
 from pathlib import Path
 
-import httpx
-
 from api.models import Region
 from config import settings
 from utils.logger import logger
 
-# Bounding box detection prompt for Gemini 2.0 Flash
 _DETECTION_PROMPT = """
 Analyze this video frame and detect specialized regions for vertical (9:16) reframing.
 Return JSON ONLY with a list called 'regions'.
@@ -26,7 +23,7 @@ Guidelines:
 
 _SAMPLE_RATIOS = (0.25, 0.5, 0.75)
 _MAX_RETRIES = 3
-_RATE_LIMIT_BACKOFF_SEC = 2.0
+_RATE_LIMIT_BACKOFF_SEC = 5.0
 _EARLY_EXIT_SCORE = (450, 0, 0)
 
 
@@ -34,12 +31,9 @@ def _probe_duration(video_path: str) -> float | None:
     try:
         cmd = [
             "ffprobe",
-            "-v",
-            "error",
-            "-show_entries",
-            "format=duration",
-            "-of",
-            "default=noprint_wrappers=1:nokey=1",
+            "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1",
             video_path,
         ]
         return float(subprocess.check_output(cmd).decode().strip())
@@ -61,16 +55,11 @@ def extract_sample_frames(video_path: str, output_dir: Path) -> list[tuple[float
         timestamp = max(0.0, duration * ratio)
         frame_path = output_dir / f"vision_sample_{index:02d}.jpg"
         cmd = [
-            "ffmpeg",
-            "-y",
-            "-ss",
-            f"{timestamp:.3f}",
-            "-i",
-            video_path,
-            "-vframes",
-            "1",
-            "-q:v",
-            "2",
+            "ffmpeg", "-y",
+            "-ss", f"{timestamp:.3f}",
+            "-i", video_path,
+            "-vframes", "1",
+            "-q:v", "2",
             str(frame_path),
         ]
         result = subprocess.run(cmd, capture_output=True)
@@ -102,51 +91,54 @@ def _parse_regions(raw_text: str) -> list[Region]:
 
 
 def _detect_regions_from_frame(frame_path: Path) -> list[Region]:
+    from openai import OpenAI, RateLimitError
+
     with open(frame_path, "rb") as file:
         image_data = base64.b64encode(file.read()).decode("utf-8")
 
-    payload = {
-        "contents": [
-            {
-                "parts": [
-                    {"text": _DETECTION_PROMPT},
-                    {"inline_data": {"mime_type": "image/jpeg", "data": image_data}},
-                ]
-            }
-        ],
-        "generationConfig": {
-            "temperature": 0.1,
-            "responseMimeType": "application/json",
-        },
-    }
-
-    url = (
-        "https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{settings.gemini_model}:generateContent?key={settings.gemini_api_key}"
-    )
+    client = OpenAI(api_key=settings.openai_api_key)
 
     last_error: Exception | None = None
-    with httpx.Client(timeout=30.0) as client:
-        for attempt in range(1, _MAX_RETRIES + 1):
-            try:
-                response = client.post(url, json=payload)
-                response.raise_for_status()
-                data = response.json()
-                raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
-                return _parse_regions(raw_text)
-            except httpx.HTTPStatusError as exc:
-                last_error = exc
-                if exc.response.status_code != 429 or attempt == _MAX_RETRIES:
-                    raise
-                sleep_for = _RATE_LIMIT_BACKOFF_SEC * attempt
-                logger.warning(
-                    f"[VISION] Gemini rate limited for {frame_path.name}; "
-                    f"retry {attempt}/{_MAX_RETRIES} in {sleep_for:.1f}s."
-                )
-                time.sleep(sleep_for)
-            except Exception as exc:
-                last_error = exc
+    for attempt in range(1, _MAX_RETRIES + 1):
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": _DETECTION_PROMPT},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{image_data}",
+                                    "detail": "low",
+                                },
+                            },
+                        ],
+                    }
+                ],
+                response_format={"type": "json_object"},
+                max_tokens=512,
+                temperature=0.1,
+            )
+            raw_text = response.choices[0].message.content or "{}"
+            return _parse_regions(raw_text)
+
+        except RateLimitError as exc:
+            last_error = exc
+            if attempt == _MAX_RETRIES:
                 raise
+            sleep_for = _RATE_LIMIT_BACKOFF_SEC * attempt
+            logger.warning(
+                f"[VISION] OpenAI rate limited for {frame_path.name}; "
+                f"retry {attempt}/{_MAX_RETRIES} in {sleep_for:.1f}s."
+            )
+            time.sleep(sleep_for)
+
+        except Exception as exc:
+            last_error = exc
+            raise
 
     if last_error is not None:
         raise last_error
@@ -154,10 +146,7 @@ def _detect_regions_from_frame(frame_path: Path) -> list[Region]:
 
 
 def _region_selection_score(regions: list[Region]) -> tuple[int, int, int]:
-    """
-    Rank frames by how suitable they are for layout selection.
-    Higher tuple wins.
-    """
+    """Rank frames by how suitable they are for layout selection. Higher tuple wins."""
     face_count = sum(1 for region in regions if region.label == "face")
     has_screen = any(region.label == "screen" for region in regions)
     has_gameplay = any(region.label == "gameplay" for region in regions)
@@ -181,8 +170,8 @@ def _region_selection_score(regions: list[Region]) -> tuple[int, int, int]:
 
 def detect_regions(video_path: str) -> list[Region]:
     """Sample multiple frames and keep the most layout-informative one."""
-    if not settings.gemini_api_key:
-        logger.warning("[VISION] No Gemini API key - skipping region detection.")
+    if not settings.openai_api_key:
+        logger.warning("[VISION] No OpenAI API key — skipping region detection.")
         return []
 
     sample_dir = Path(video_path).parent / f"{Path(video_path).stem}_vision_samples"
@@ -198,14 +187,8 @@ def detect_regions(video_path: str) -> list[Region]:
         for timestamp, frame_path in sampled_frames:
             try:
                 regions = _detect_regions_from_frame(frame_path)
-            except httpx.HTTPStatusError as exc:
-                logger.error(f"[VISION] Gemini detection failed for {frame_path.name}: {exc}")
-                if exc.response.status_code == 429:
-                    logger.warning("[VISION] Stopping further frame analysis because Gemini is rate limiting.")
-                    break
-                continue
             except Exception as exc:
-                logger.error(f"[VISION] Gemini detection failed for {frame_path.name}: {exc}")
+                logger.error(f"[VISION] OpenAI detection failed for {frame_path.name}: {exc}")
                 continue
 
             score = _region_selection_score(regions)

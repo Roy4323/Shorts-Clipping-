@@ -4,7 +4,6 @@
   // ── State ──────────────────────────────────────────────────────────
   let selectedVideo  = null;
   let selectedAudio  = null;
-  let activeJobId    = null;   // currently being polled
   let viewJobId      = null;   // currently shown in detail view
   let pollTimer      = null;
   let shortsCount    = 3;      // how many shorts to generate
@@ -20,7 +19,6 @@
 
   // ── DOM shortcuts ──────────────────────────────────────────────────
   const $  = id => document.getElementById(id);
-  const qs = sel => document.querySelector(sel);
 
   // ── Tabs ───────────────────────────────────────────────────────────
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -102,7 +100,6 @@
 
   // ── Active job tracking ────────────────────────────────────────────
   function startTracking(jobId) {
-    activeJobId = jobId;
     localStorage.setItem(LS_KEY, jobId);
     $('active-job-card').classList.remove('hidden');
     $('live-dot').classList.remove('idle');
@@ -237,7 +234,7 @@
     renderScoring(job);
 
     // Clips — playable + downloadable
-    renderClips(jobId, job.clips || []);
+    renderClips(jobId, job.clips || [], job.metadata);
 
     // Mark history card
     document.querySelectorAll('.history-card').forEach(c => {
@@ -336,39 +333,269 @@
     });
   }
 
-  function renderClips(jobId, clips) {
+  function _compactSubs(n) {
+    if (!n) return '';
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1_000)     return Math.floor(n / 1_000) + 'K';
+    return String(n);
+  }
+
+  function renderClips(jobId, clips, jobMeta) {
     $('clips-count-label').textContent = clips.length ? clips.length + ' clips' : '';
     const grid = $('clips-grid');
+    const defaultChannelName = escHtml(jobMeta?.uploader || '');
+    const defaultSubCount    = _compactSubs(jobMeta?.channel_follower_count);
+
     grid.innerHTML = clips.map(clip => {
-      const dur = (clip.end_sec - clip.start_sec).toFixed(1);
-      const clipUrl = `/api/clip/${jobId}/${clip.clip_number}`;
+      const n      = clip.clip_number;
+      const dur    = (clip.end_sec - clip.start_sec).toFixed(1);
+      const clipUrl = `/api/clip/${jobId}/${n}`;
       return `
-        <div class="clip-card">
+        <div class="clip-card" id="clip-card-${n}">
           <div class="clip-preview">
-            <video class="clip-video" preload="metadata" playsinline loop
-              poster="/api/clip/${jobId}/${clip.clip_number}/thumb">
+            <video class="clip-video" id="clip-video-${n}" preload="metadata" playsinline loop
+              poster="/api/clip/${jobId}/${n}/thumb">
               <source src="${clipUrl}" type="video/mp4">
             </video>
-            <div class="clip-play-overlay" data-clip-id="cv-${clip.clip_number}">
+            <div class="clip-play-overlay">
               <span class="play-icon">▶</span>
             </div>
           </div>
           <div class="clip-body">
-            <div class="clip-num">Short #${clip.clip_number}${clip.engagement_type ? ` <span class="eng-badge">${clip.engagement_type}</span>` : ''}</div>
+            <div class="clip-num">Short #${n}${clip.engagement_type ? ` <span class="eng-badge">${clip.engagement_type}</span>` : ''}</div>
             <div class="clip-time">${fmtTime(clip.start_sec)} – ${fmtTime(clip.end_sec)} · ${dur}s · score ${clip.score.toFixed(2)}</div>
             ${clip.hook ? `<div class="clip-hook">"${escHtml(clip.hook)}"</div>` : ''}
           </div>
-          <a class="clip-dl" href="${clipUrl}" download="short_${clip.clip_number}.mp4">↓ Download</a>
+
+          <!-- ── CTA inline form ── -->
+          <div class="cta-inline hidden" id="cta-inline-${n}">
+            <div class="cta-inline-grid">
+              <input type="text" class="cta-inp" id="cta-name-${n}"
+                placeholder="Channel name" value="${defaultChannelName}">
+              <input type="text" class="cta-inp" id="cta-subs-${n}"
+                placeholder="Subscribers e.g. 20K" value="${defaultSubCount}">
+            </div>
+            <div class="cta-inline-row2">
+              <div class="cta-swatches" id="cta-sw-${n}">
+                <button class="cta-sw active" data-color="#CC0000" style="background:#CC0000" title="Red"></button>
+                <button class="cta-sw" data-color="#000000" style="background:#000000" title="Black"></button>
+                <button class="cta-sw" data-color="#1565C0" style="background:#1565C0" title="Blue"></button>
+                <button class="cta-sw" data-color="#2E7D32" style="background:#2E7D32" title="Green"></button>
+                <label class="cta-custom-lbl" title="Custom color">
+                  <input type="color" id="cta-color-${n}" value="#CC0000">
+                </label>
+              </div>
+              <div class="cta-logo-wrap">
+                <div class="cta-lp" id="cta-lp-${n}">?</div>
+                <button class="btn-ghost btn-xs" id="cta-logo-btn-${n}">Logo</button>
+                <input type="file" id="cta-logo-inp-${n}" accept="image/*" hidden>
+              </div>
+            </div>
+            <button class="btn-primary btn-sm cta-apply-btn" id="cta-apply-${n}">
+              Apply Bumper ›
+            </button>
+            <div class="cta-status hidden" id="cta-status-${n}"></div>
+          </div>
+
+          <!-- ── Bottom action row ── -->
+          <div class="clip-actions-row">
+            <button class="btn-ghost btn-sm cta-toggle-btn" id="cta-toggle-${n}">
+              + Add CTA Bumper
+            </button>
+            <a class="clip-dl" id="clip-dl-${n}" href="${clipUrl}" download="short_${n}.mp4">↓ Download</a>
+          </div>
         </div>`;
     }).join('');
 
-    // Click to play clips in modal
+    // ── Bind per-clip CTA logic ────────────────────────────────────────────
+    clips.forEach(clip => {
+      const n = clip.clip_number;
+      let accentColor = '#CC0000';
+      let logoId      = null;
+
+      // Toggle form open/close — auto-fill channel info on first open
+      let ctaAutoFilled = false;
+      document.getElementById(`cta-toggle-${n}`).addEventListener('click', async () => {
+        const form = document.getElementById(`cta-inline-${n}`);
+        const btn  = document.getElementById(`cta-toggle-${n}`);
+        const open = form.classList.toggle('hidden') === false;
+        btn.textContent = open ? '✕ Close' : '+ Add CTA Bumper';
+        btn.classList.toggle('cta-toggle-open', open);
+
+        // Auto-fill from YouTube API on first open (only for YouTube URLs)
+        if (open && !ctaAutoFilled) {
+          ctaAutoFilled = true;
+          const videoUrl = jobMeta?.webpage_url || '';
+          if (videoUrl && !videoUrl.startsWith('local://')) {
+            try {
+              const infoRes = await fetch(`/api/youtube/channel-info?url=${encodeURIComponent(videoUrl)}`);
+              if (infoRes.ok) {
+                const info = await infoRes.json();
+                // Pre-fill subscriber count
+                const subsEl = document.getElementById(`cta-subs-${n}`);
+                if (subsEl && !subsEl.value) subsEl.value = info.subscriber_count || '';
+                // Pre-fill channel name if blank
+                const nameEl = document.getElementById(`cta-name-${n}`);
+                if (nameEl && !nameEl.value) nameEl.value = info.channel_name || '';
+                // Download + display the channel logo
+                if (info.logo_url) {
+                  const lpEl = document.getElementById(`cta-lp-${n}`);
+                  try {
+                    const logoRes = await fetch('/api/fetch-logo-from-url', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ url: info.logo_url }),
+                    });
+                    if (logoRes.ok) {
+                      const logoData = await logoRes.json();
+                      logoId = logoData.logo_id;
+                      if (lpEl) lpEl.innerHTML =
+                        `<img src="${info.logo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" crossorigin="anonymous">`;
+                    }
+                  } catch (_) {}
+                }
+              }
+            } catch (_) {}
+          }
+        }
+      });
+
+      // Color swatches
+      document.querySelectorAll(`#cta-sw-${n} .cta-sw`).forEach(sw => {
+        sw.addEventListener('click', () => {
+          document.querySelectorAll(`#cta-sw-${n} .cta-sw`).forEach(s => s.classList.remove('active'));
+          sw.classList.add('active');
+          accentColor = sw.dataset.color;
+          document.getElementById(`cta-color-${n}`).value = accentColor;
+        });
+      });
+      document.getElementById(`cta-color-${n}`).addEventListener('input', e => {
+        accentColor = e.target.value;
+        document.querySelectorAll(`#cta-sw-${n} .cta-sw`).forEach(s => s.classList.remove('active'));
+      });
+
+      // Logo upload
+      document.getElementById(`cta-logo-btn-${n}`).addEventListener('click', () => {
+        document.getElementById(`cta-logo-inp-${n}`).click();
+      });
+      document.getElementById(`cta-logo-inp-${n}`).addEventListener('change', async () => {
+        const file = document.getElementById(`cta-logo-inp-${n}`).files[0];
+        if (!file) return;
+        const form = new FormData();
+        form.append('logo', file);
+        try {
+          const r = await fetch('/api/upload-logo', { method: 'POST', body: form });
+          if (!r.ok) throw new Error('Logo upload failed');
+          logoId = (await r.json()).logo_id;
+          const reader = new FileReader();
+          reader.onload = ev => {
+            document.getElementById(`cta-lp-${n}`).innerHTML =
+              `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+          };
+          reader.readAsDataURL(file);
+        } catch (e) { toast(e.message); }
+      });
+
+      // Apply bumper
+      document.getElementById(`cta-apply-${n}`).addEventListener('click', async () => {
+        const channelName = document.getElementById(`cta-name-${n}`).value.trim();
+        const subCount    = document.getElementById(`cta-subs-${n}`).value.trim() || '0';
+        if (!channelName) { toast('Enter a channel name first.'); return; }
+
+        const applyBtn = document.getElementById(`cta-apply-${n}`);
+        const statusEl = document.getElementById(`cta-status-${n}`);
+        applyBtn.disabled    = true;
+        applyBtn.textContent = 'Rendering…';
+        statusEl.textContent = 'Generating bumper, please wait (~15s)…';
+        statusEl.className   = 'cta-status cta-status-loading';
+        statusEl.classList.remove('hidden');
+
+        try {
+          const r = await fetch(`/api/clip/${jobId}/${n}/add-cta`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              enabled: true,
+              channel_name: channelName,
+              subscriber_count: subCount,
+              logo_id: logoId,
+              accent_color: accentColor,
+            }),
+          });
+          const data = await r.json().catch(() => null);
+          if (!r.ok) throw new Error((data && data.detail) || r.statusText);
+
+          const ctaDuration  = (data && data.new_duration)   || 0;
+          const ctaThumbUrl  = (data && data.cta_thumb_url)  || null;
+          const ctaStartSec  = Math.max(0, ctaDuration - 3.5);
+
+          // Collapse form, lock toggle button
+          document.getElementById(`cta-inline-${n}`).classList.add('hidden');
+          const toggleBtn = document.getElementById(`cta-toggle-${n}`);
+          toggleBtn.textContent = '✓ CTA Applied';
+          toggleBtn.classList.add('cta-applied');
+          toggleBtn.disabled = true;
+
+          // Bust browser cache so the updated file (with bumper) is fetched
+          const ts = Date.now();
+          const newUrl = `/api/clip/${jobId}/${n}?t=${ts}`;
+
+          // Update video preview source + reload
+          const vid = document.getElementById(`clip-video-${n}`);
+          if (vid) {
+            const srcEl = vid.querySelector('source');
+            if (srcEl) srcEl.src = newUrl;
+            vid.src = newUrl;
+            // Show the CTA frame as the poster so the card thumbnail changes
+            if (ctaThumbUrl) vid.poster = ctaThumbUrl + `?t=${ts}`;
+            vid.load();
+          }
+
+          // Update download link
+          const dlLink = document.getElementById(`clip-dl-${n}`);
+          if (dlLink) {
+            dlLink.href = newUrl;
+            dlLink.setAttribute('download', `short_${n}_cta.mp4`);
+          }
+
+          // Inject a "▶ Preview CTA" button that opens the modal at the CTA start
+          const actionsRow = document.querySelector(`#clip-card-${n} .clip-actions-row`);
+          if (actionsRow && !actionsRow.querySelector('.cta-preview-btn')) {
+            const previewBtn = document.createElement('button');
+            previewBtn.className = 'btn-ghost btn-sm cta-preview-btn';
+            previewBtn.textContent = '▶ Preview CTA';
+            previewBtn.addEventListener('click', () => {
+              const modalVideo = $('modal-video');
+              modalVideo.src = newUrl;
+              modalVideo.load();
+              $('video-modal').classList.remove('hidden');
+              modalVideo.addEventListener('loadedmetadata', function seekOnce() {
+                modalVideo.currentTime = ctaStartSec;
+                modalVideo.play().catch(() => {});
+                modalVideo.removeEventListener('loadedmetadata', seekOnce);
+              });
+            });
+            actionsRow.insertBefore(previewBtn, actionsRow.firstChild);
+          }
+
+          toastSuccess(`CTA bumper appended (${ctaDuration}s total)! Click "▶ Preview CTA" to see it, or ↓ Download to save.`);
+
+        } catch (e) {
+          statusEl.textContent = '✗ Failed: ' + e.message;
+          statusEl.className   = 'cta-status cta-status-error';
+          applyBtn.disabled    = false;
+          applyBtn.textContent = 'Apply Bumper ›';
+        }
+      });
+    });
+
+    // ── Play in modal ──────────────────────────────────────────────────────
     grid.querySelectorAll('.clip-play-overlay').forEach(overlay => {
-      overlay.addEventListener('click', (e) => {
+
+      overlay.addEventListener('click', e => {
         e.stopPropagation();
-        const card = overlay.closest('.clip-card');
+        const card    = overlay.closest('.clip-card');
         const clipUrl = card.querySelector('.clip-video source').src;
-        
         const modalVideo = $('modal-video');
         modalVideo.src = clipUrl;
         modalVideo.load();
@@ -497,6 +724,13 @@
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 6000);
   }
+  function toastSuccess(msg) {
+    const t = document.createElement('div');
+    t.className   = 'toast toast-success';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 7000);
+  }
   function toastWarn(msg) {
     const t = document.createElement('div');
     t.className   = 'toast toast-warn';
@@ -544,5 +778,509 @@
   setInterval(refreshHistory, 4000);
   reconnectIfNeeded();
   refreshHistory();
+
+  // ══════════════════════════════════════════════════════════════════
+  // PAGE NAVIGATION (Shorts ↔ Hook Studio)
+  // ══════════════════════════════════════════════════════════════════
+  document.querySelectorAll('.page-nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.page-nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const page = btn.dataset.page;
+      $('shorts-page').classList.toggle('hidden', page !== 'shorts');
+      $('hooks-page').classList.toggle('hidden', page !== 'hooks');
+      if (page === 'hooks') hsLoadJobList();
+    });
+  });
+
+
+  // ══════════════════════════════════════════════════════════════════
+  // HOOK STUDIO
+  // ══════════════════════════════════════════════════════════════════
+
+  let hsJobData = null;   // currently loaded job payload
+
+  const VOICES = [
+    { id: 'en-US-GuyNeural',    label: 'Guy (US Male)' },
+    { id: 'en-US-JennyNeural',  label: 'Jenny (US Female)' },
+    { id: 'en-GB-RyanNeural',   label: 'Ryan (UK Male)' },
+  ];
+
+  // Threshold matching hook_detector.py
+  const HOOK_ENERGY_THRESHOLD = 0.7;
+  const HOOK_SEMANTIC_CEILING = 0.4;
+
+  function hsIsCandidate(w) {
+    const s2 = w.signal2 || 0, s3 = w.signal3 || 0, s1 = w.signal1 || 0;
+    return (s2 + s3) / 2 > HOOK_ENERGY_THRESHOLD && s1 < HOOK_SEMANTIC_CEILING;
+  }
+
+  // Populate job selector with done jobs
+  async function hsLoadJobList() {
+    try {
+      const r = await fetch('/api/jobs');
+      if (!r.ok) return;
+      const jobs = await r.json();
+      const sel = $('hs-job-select');
+      const prev = sel.value;
+      sel.innerHTML = '<option value="">— Select a completed job —</option>';
+      jobs.filter(j => j.stage === 'done').forEach(j => {
+        const title = j.metadata?.title || j.url;
+        const opt = document.createElement('option');
+        opt.value = j.job_id;
+        opt.textContent = (title.length > 70 ? title.slice(0, 68) + '…' : title);
+        sel.appendChild(opt);
+      });
+      if (prev) sel.value = prev;
+    } catch (_) {}
+  }
+
+  $('hs-load-btn').addEventListener('click', async () => {
+    const jobId = $('hs-job-select').value;
+    if (!jobId) { toast('Please select a job first.'); return; }
+    try {
+      const r = await fetch(`/api/status/${jobId}`);
+      if (!r.ok) throw new Error('Job not found');
+      hsJobData = await r.json();
+      hsRenderWorkspace(jobId, hsJobData);
+    } catch (e) { toast(e.message); }
+  });
+
+  function hsRenderWorkspace(jobId, job) {
+    $('hs-workspace').classList.remove('hidden');
+
+    // Header
+    const title = job.metadata?.title || job.url;
+    $('hs-job-title').textContent = title;
+    $('hs-job-meta').textContent =
+      (job.metadata?.duration ? fmtDuration(job.metadata.duration) + '  ·  ' : '') +
+      (job.metadata?.uploader || '') +
+      (job.classification?.content_type ? '  ·  ' + job.classification.content_type.replace(/_/g, ' ') : '');
+
+    // Video player
+    $('hs-video-src').src = `/api/video/${jobId}`;
+    $('hs-video').load();
+
+    // Timeline
+    hsRenderTimeline(job);
+
+    // Window cards
+    hsRenderWindows(jobId, job);
+  }
+
+  function hsRenderTimeline(job) {
+    const duration = job.metadata?.duration || 0;
+    if (!duration) { $('hs-timeline').style.display = 'none'; return; }
+    $('hs-timeline').style.display = '';
+    $('hs-tl-time-end').textContent = fmtTime(duration);
+
+    const windows = job.windows || [];
+    $('hs-tl-segments').innerHTML = windows.map((w, i) => {
+      const left  = (w.start / duration * 100).toFixed(2);
+      const width = Math.max(0.5, ((w.end - w.start) / duration * 100)).toFixed(2);
+      const isHook = hsIsCandidate(w);
+      const label = `#${i + 1}  ${fmtTime(w.start)}–${fmtTime(w.end)}`;
+      return `<div class="hs-tl-seg ${isHook ? 'hook-cand' : ''}"
+                   style="left:${left}%;width:${width}%"
+                   data-start="${w.start}"
+                   title="${label}${isHook ? '  🔥 Hook candidate' : ''}"></div>`;
+    }).join('');
+
+    // Click to seek
+    $('hs-tl-segments').querySelectorAll('.hs-tl-seg').forEach(seg => {
+      seg.addEventListener('click', () => {
+        const video = $('hs-video');
+        video.currentTime = parseFloat(seg.dataset.start);
+        video.play().catch(() => {});
+      });
+    });
+
+    // Playhead sync
+    $('hs-video').addEventListener('timeupdate', () => {
+      if (!duration) return;
+      const pct = ($('hs-video').currentTime / duration * 100).toFixed(2);
+      $('hs-tl-playhead').style.left = pct + '%';
+    });
+
+    // Click anywhere on timeline to seek
+    $('hs-timeline').addEventListener('click', e => {
+      if (e.target.classList.contains('hs-tl-seg')) return;
+      const rect = $('hs-timeline').getBoundingClientRect();
+      const pct  = (e.clientX - rect.left) / rect.width;
+      $('hs-video').currentTime = pct * duration;
+    });
+  }
+
+  function hsRenderWindows(jobId, job) {
+    const windows  = job.windows || [];
+    const hookClips = job.hook_clips || [];
+    const content_type = job.classification?.content_type || 'general';
+    const container = $('hs-windows');
+
+    if (!windows.length) {
+      container.innerHTML = '<div style="color:var(--muted);text-align:center;padding:2rem">No scored windows found in this job.</div>';
+      return;
+    }
+
+    container.innerHTML = windows.map((w, i) => {
+      const isHook  = hsIsCandidate(w);
+      const dur     = (w.end - w.start).toFixed(1);
+      const pct     = Math.round((w.score || 0) * 100);
+      const s1      = Math.round((w.signal1 || 0) * 100);
+      const s2      = Math.round((w.signal2 || 0) * 100);
+      const s3      = Math.round((w.signal3 || 0) * 100);
+      const existHook = hookClips.find(h => Math.abs(h.start_sec - w.start) < 2);
+
+      const voiceOpts = VOICES.map(v =>
+        `<option value="${v.id}" ${v.id === 'en-US-GuyNeural' ? 'selected' : ''}>${v.label}</option>`
+      ).join('');
+
+      const scoreSignals = `
+        <div class="hs-signals">
+          <div class="hs-sig-row" title="Semantic quality (Signal 1)">
+            <span class="hs-sig-lbl">Semantic</span>
+            <div class="hs-sig-track"><div class="hs-sig-fill semantic" style="width:${s1}%"></div></div>
+            <span class="hs-sig-num">${s1}%</span>
+          </div>
+          <div class="hs-sig-row" title="Audio energy (Signal 2)">
+            <span class="hs-sig-lbl">Energy</span>
+            <div class="hs-sig-track"><div class="hs-sig-fill energy" style="width:${s2}%"></div></div>
+            <span class="hs-sig-num">${s2}%</span>
+          </div>
+          <div class="hs-sig-row" title="Speaker activity (Signal 3)">
+            <span class="hs-sig-lbl">Speaker</span>
+            <div class="hs-sig-track"><div class="hs-sig-fill speaker" style="width:${s3}%"></div></div>
+            <span class="hs-sig-num">${s3}%</span>
+          </div>
+        </div>`;
+
+      const defaultChannelName = job.metadata?.uploader || '';
+      const existClip = existHook ? `
+        <div class="hs-clip-result" id="hs-result-${i}">
+          <div class="hs-clip-preview-row">
+            <video class="hs-clip-thumb" preload="metadata" playsinline loop
+              poster="/api/hook/${jobId}/${existHook.clip_number}/thumb"
+              src="${existHook.download_url}"></video>
+            <div class="hs-clip-info">
+              <div class="hs-clip-title">Hook Clip #${existHook.clip_number}</div>
+              <div class="hs-clip-sub">${existHook.hook_type} · ${existHook.duration}s · ${existHook.voice}</div>
+              <div class="hs-clip-hook-text">"${escHtml(existHook.hook_text)}"</div>
+              ${_hookCTAHtml(jobId, existHook.clip_number, defaultChannelName)}
+            </div>
+          </div>
+        </div>` : `<div class="hs-clip-result hidden" id="hs-result-${i}"></div>`;
+
+      return `
+        <div class="card hs-window-card ${isHook ? 'hook-candidate-card' : ''}" data-idx="${i}">
+          <div class="hs-win-header">
+            <div class="hs-win-left">
+              <span class="hs-win-rank">#${i + 1}</span>
+              <div>
+                <div class="hs-win-time">${fmtTime(w.start)} → ${fmtTime(w.end)} · ${dur}s</div>
+                ${w.engagement_type ? `<span class="eng-badge">${w.engagement_type}</span>` : ''}
+              </div>
+            </div>
+            <div class="hs-win-right">
+              ${isHook ? '<span class="hook-cand-badge">🔥 Hook Candidate</span>' : ''}
+              <span class="hs-win-score">${pct}%</span>
+            </div>
+          </div>
+
+          ${scoreSignals}
+
+          ${w.hook ? `<div class="hs-original-hook"><span class="hs-label">AI Caption:</span> "${escHtml(w.hook)}"</div>` : ''}
+
+          <div class="hs-script-section">
+            <div class="hs-label-row">
+              <label class="hs-label" for="hs-script-${i}">Hook Script</label>
+              <button class="btn-ghost btn-sm hs-suggest-btn" data-idx="${i}" data-content-type="${content_type}">
+                ✨ AI Suggest
+              </button>
+            </div>
+            <textarea class="hs-script-area" id="hs-script-${i}"
+              placeholder="Write or auto-generate a 30-40 word spoken hook…">${w.hook || ''}</textarea>
+            <div class="hs-gen-row">
+              <select class="hs-voice-select" id="hs-voice-${i}">${voiceOpts}</select>
+              <button class="btn-primary hs-gen-btn" data-idx="${i}" data-job="${jobId}">
+                🎤 Generate Clip
+              </button>
+            </div>
+            <div class="hs-gen-status hidden" id="hs-status-${i}"></div>
+          </div>
+
+          ${existClip}
+        </div>`;
+    }).join('');
+
+    // Bind CTA forms for pre-existing hook clips
+    const defaultChannelName = job.metadata?.uploader || '';
+    hookClips.forEach(hc => _bindHookCTA(jobId, hc.clip_number, defaultChannelName));
+
+    // Suggest buttons
+    container.querySelectorAll('.hs-suggest-btn').forEach(btn => {
+      btn.addEventListener('click', () => hsSuggestScript(btn.dataset.idx, btn.dataset.contentType, jobId));
+    });
+
+    // Generate buttons
+    container.querySelectorAll('.hs-gen-btn').forEach(btn => {
+      btn.addEventListener('click', () => hsGenerateClip(btn.dataset.idx, btn.dataset.job));
+    });
+
+    // Click on clip thumbnails to play in modal
+    container.querySelectorAll('.hs-clip-thumb').forEach(vid => {
+      vid.addEventListener('click', () => {
+        const modalVideo = $('modal-video');
+        modalVideo.src = vid.src;
+        modalVideo.load();
+        $('video-modal').classList.remove('hidden');
+        modalVideo.play().catch(() => {});
+      });
+    });
+  }
+
+  async function hsSuggestScript(idx, contentType, jobId) {
+    const btn = document.querySelector(`.hs-suggest-btn[data-idx="${idx}"]`);
+    const area = $(`hs-script-${idx}`);
+    const status = $(`hs-status-${idx}`);
+    btn.disabled = true;
+    btn.textContent = '⏳ Thinking…';
+    status.classList.remove('hidden');
+    status.textContent = 'Generating hook script…';
+    status.className = 'hs-gen-status info';
+    try {
+      const r = await fetch(`/api/hook/${jobId}/suggest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ window_index: parseInt(idx), content_type: contentType }),
+      });
+      if (!r.ok) throw new Error((await r.json()).detail || r.statusText);
+      const data = await r.json();
+      area.value = data.hook;
+      status.textContent = `✅ ${data.hook_type} hook suggested (est. ${data.duration_estimate_sec}s)`;
+      status.className = 'hs-gen-status success';
+    } catch (e) {
+      status.textContent = '⚠ Suggestion failed: ' + e.message;
+      status.className = 'hs-gen-status error';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '✨ AI Suggest';
+    }
+  }
+
+  async function hsGenerateClip(idx, jobId) {
+    const btn    = document.querySelector(`.hs-gen-btn[data-idx="${idx}"]`);
+    const area   = $(`hs-script-${idx}`);
+    const voice  = $(`hs-voice-${idx}`).value;
+    const status = $(`hs-status-${idx}`);
+    const result = $(`hs-result-${idx}`);
+
+    const hookText = area.value.trim();
+    if (!hookText) { toast('Please write or generate a hook script first.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Generating…';
+    status.classList.remove('hidden');
+    status.textContent = '🎤 Synthesising speech…';
+    status.className = 'hs-gen-status info';
+
+    try {
+      const r = await fetch(`/api/hook/${jobId}/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ window_index: parseInt(idx), hook_text: hookText, voice }),
+      });
+      if (!r.ok) throw new Error((await r.json()).detail || r.statusText);
+      const clip = await r.json();
+
+      status.textContent = `✅ Hook clip #${clip.clip_number} ready (${clip.duration}s)`;
+      status.className = 'hs-gen-status success';
+
+      // Render result card
+      const hsDefaultName = document.getElementById('hs-job-title')?.textContent || '';
+      result.classList.remove('hidden');
+      result.innerHTML = `
+        <div class="hs-clip-preview-row">
+          <video class="hs-clip-thumb" preload="metadata" playsinline loop
+            src="${clip.download_url}" style="cursor:pointer"></video>
+          <div class="hs-clip-info">
+            <div class="hs-clip-title">Hook Clip #${clip.clip_number}</div>
+            <div class="hs-clip-sub">${clip.hook_type} · ${clip.duration}s · ${clip.voice}</div>
+            <div class="hs-clip-hook-text">"${escHtml(clip.hook_text)}"</div>
+            ${_hookCTAHtml(jobId, clip.clip_number, hsDefaultName)}
+          </div>
+        </div>`;
+
+      _bindHookCTA(jobId, clip.clip_number, hsDefaultName);
+
+      // Click to play in modal
+      result.querySelector('.hs-clip-thumb').addEventListener('click', () => {
+        const modalVideo = $('modal-video');
+        modalVideo.src = clip.download_url;
+        modalVideo.load();
+        $('video-modal').classList.remove('hidden');
+        modalVideo.play().catch(() => {});
+      });
+
+    } catch (e) {
+      status.textContent = '⚠ Generation failed: ' + e.message;
+      status.className = 'hs-gen-status error';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🎤 Generate Clip';
+    }
+  }
+
+  // ── CTA helpers shared by Hook Studio ─────────────────────────────────
+
+  function _hookCTAHtml(jobId, clipNumber, defaultName) {
+    const n  = clipNumber;
+    const dn = escHtml(defaultName || '');
+    return `
+      <div class="cta-inline hidden" id="hcta-inline-${n}">
+        <div class="cta-inline-grid">
+          <input type="text" class="cta-inp" id="hcta-name-${n}"
+            placeholder="Channel name" value="${dn}">
+          <input type="text" class="cta-inp" id="hcta-subs-${n}"
+            placeholder="Subscribers e.g. 20K">
+        </div>
+        <div class="cta-inline-row2">
+          <div class="cta-swatches" id="hcta-sw-${n}">
+            <button class="cta-sw active" data-color="#CC0000" style="background:#CC0000" title="Red"></button>
+            <button class="cta-sw" data-color="#000000" style="background:#000000" title="Black"></button>
+            <button class="cta-sw" data-color="#1565C0" style="background:#1565C0" title="Blue"></button>
+            <button class="cta-sw" data-color="#2E7D32" style="background:#2E7D32" title="Green"></button>
+            <label class="cta-custom-lbl" title="Custom color">
+              <input type="color" id="hcta-color-${n}" value="#CC0000">
+            </label>
+          </div>
+          <div class="cta-logo-wrap">
+            <div class="cta-lp" id="hcta-lp-${n}">?</div>
+            <button class="btn-ghost btn-xs" id="hcta-logo-btn-${n}">Logo</button>
+            <input type="file" id="hcta-logo-inp-${n}" accept="image/*" hidden>
+          </div>
+        </div>
+        <button class="btn-primary btn-sm cta-apply-btn" id="hcta-apply-${n}">
+          Apply Bumper ›
+        </button>
+        <div class="cta-status hidden" id="hcta-status-${n}"></div>
+      </div>
+      <div class="clip-actions-row" style="padding:.6rem .2rem .2rem">
+        <button class="btn-ghost btn-sm cta-toggle-btn" id="hcta-toggle-${n}">
+          + Add CTA Bumper
+        </button>
+        <a class="btn-outline btn-sm" href="/api/hook/${jobId}/${n}" download
+          id="hcta-dl-${n}">↓ Download</a>
+      </div>`;
+  }
+
+  function _bindHookCTA(jobId, clipNumber) {
+    const n = clipNumber;
+    // Guard: if this hook clip's window card isn't rendered in the DOM, skip.
+    if (!document.getElementById(`hcta-toggle-${n}`)) return;
+
+    let accentColor = '#CC0000';
+    let logoId      = null;
+
+    document.getElementById(`hcta-toggle-${n}`).addEventListener('click', () => {
+      const form = document.getElementById(`hcta-inline-${n}`);
+      const btn  = document.getElementById(`hcta-toggle-${n}`);
+      const open = form.classList.toggle('hidden') === false;
+      btn.textContent = open ? '✕ Close' : '+ Add CTA Bumper';
+      btn.classList.toggle('cta-toggle-open', open);
+    });
+
+    document.querySelectorAll(`#hcta-sw-${n} .cta-sw`).forEach(sw => {
+      sw.addEventListener('click', () => {
+        document.querySelectorAll(`#hcta-sw-${n} .cta-sw`).forEach(s => s.classList.remove('active'));
+        sw.classList.add('active');
+        accentColor = sw.dataset.color;
+        document.getElementById(`hcta-color-${n}`).value = accentColor;
+      });
+    });
+    document.getElementById(`hcta-color-${n}`).addEventListener('input', e => {
+      accentColor = e.target.value;
+      document.querySelectorAll(`#hcta-sw-${n} .cta-sw`).forEach(s => s.classList.remove('active'));
+    });
+
+    document.getElementById(`hcta-logo-btn-${n}`).addEventListener('click', () => {
+      document.getElementById(`hcta-logo-inp-${n}`).click();
+    });
+    document.getElementById(`hcta-logo-inp-${n}`).addEventListener('change', async () => {
+      const file = document.getElementById(`hcta-logo-inp-${n}`).files[0];
+      if (!file) return;
+      const form = new FormData();
+      form.append('logo', file);
+      try {
+        const r = await fetch('/api/upload-logo', { method: 'POST', body: form });
+        if (!r.ok) throw new Error('Logo upload failed');
+        logoId = (await r.json()).logo_id;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          document.getElementById(`hcta-lp-${n}`).innerHTML =
+            `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+        };
+        reader.readAsDataURL(file);
+      } catch (e) { toast(e.message); }
+    });
+
+    document.getElementById(`hcta-apply-${n}`).addEventListener('click', async () => {
+      const channelName = document.getElementById(`hcta-name-${n}`).value.trim();
+      const subCount    = document.getElementById(`hcta-subs-${n}`).value.trim() || '0';
+      if (!channelName) { toast('Enter a channel name first.'); return; }
+
+      const applyBtn = document.getElementById(`hcta-apply-${n}`);
+      const statusEl = document.getElementById(`hcta-status-${n}`);
+      applyBtn.disabled    = true;
+      applyBtn.textContent = 'Rendering…';
+      statusEl.textContent = 'Generating bumper, please wait (~15s)…';
+      statusEl.className   = 'cta-status cta-status-loading';
+      statusEl.classList.remove('hidden');
+
+      try {
+        const r = await fetch(`/api/hook/${jobId}/${n}/add-cta`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            enabled: true,
+            channel_name: channelName,
+            subscriber_count: subCount,
+            logo_id: logoId,
+            accent_color: accentColor,
+          }),
+        });
+        if (!r.ok) throw new Error((await r.json()).detail || r.statusText);
+
+        document.getElementById(`hcta-inline-${n}`).classList.add('hidden');
+        const toggleBtn = document.getElementById(`hcta-toggle-${n}`);
+        toggleBtn.textContent = '✓ CTA Applied';
+        toggleBtn.classList.add('cta-applied');
+        toggleBtn.disabled = true;
+
+        // Bust cache so the updated hook clip (with bumper) is fetched
+        const ts = Date.now();
+        const newUrl = `/api/hook/${jobId}/${n}?t=${ts}`;
+
+        // Reload the video thumbnail in Hook Studio
+        const vid = document.querySelector(`#hs-result-${n} .hs-clip-thumb, .hs-clip-thumb[src*="/api/hook/${jobId}/${n}"]`);
+        if (vid) {
+          vid.src = newUrl;
+          vid.load();
+        }
+
+        // Update the download link
+        const dlLink = document.getElementById(`hcta-dl-${n}`);
+        if (dlLink) {
+          dlLink.href = newUrl;
+          dlLink.setAttribute('download', `hook_${n}_cta.mp4`);
+        }
+
+      } catch (e) {
+        statusEl.textContent = '✗ Failed: ' + e.message;
+        statusEl.className   = 'cta-status cta-status-error';
+        applyBtn.disabled    = false;
+        applyBtn.textContent = 'Apply Bumper ›';
+      }
+    });
+  }
 
 })();
