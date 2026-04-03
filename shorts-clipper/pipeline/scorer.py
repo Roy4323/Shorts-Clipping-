@@ -109,10 +109,22 @@ def score_windows(
         logger.warning(f"[SCORER] {msg}")
         return _stub_score(transcript, video_duration, shorts_count), msg
 
+    # Detect whether we have a real transcript (not a mock/empty placeholder)
+    has_real_transcript = (
+        transcript.source not in ("mock",)
+        and len(transcript.segments) >= 3
+    )
+    if not has_real_transcript:
+        logger.warning(
+            f"[SCORER] Transcript is empty or mock (source={transcript.source}, "
+            f"segments={len(transcript.segments)}) — running Signal 2+3 only (no Signal 1)."
+        )
+
     try:
         logger.info("[SCORER] Starting multi-signal scoring engine.")
         windows = _multi_signal_score(
-            transcript, video_duration, audio_wav_path, job_id, has_hf, shorts_count
+            transcript, video_duration, audio_wav_path, job_id, has_hf, shorts_count,
+            skip_signal1=not has_real_transcript,
         )
         windows = windows[:shorts_count]
         logger.info(f"[SCORER] Trimmed to {len(windows)} windows (shorts_count={shorts_count})")
@@ -149,6 +161,7 @@ def _multi_signal_score(
     job_id: str | None,
     has_hf: bool,
     shorts_count: int = 3,
+    skip_signal1: bool = False,
 ) -> list[dict]:
     """Run all three signals and combine into scored windows."""
 
@@ -163,28 +176,30 @@ def _multi_signal_score(
     audio_json     = str(score_dir / "audio_analysis_output.json")
     dialogue_json  = str(score_dir / "speaker_turn_density.json")
 
-    # Convert transcript to the format expected by video_analyzer
-    segs = _convert_transcript(transcript)
-    logger.info(f"[SCORER] Signal 1 — Semantic analysis | {len(segs)} segments ...")
-
     # ── Signal 1: OpenAI semantic highlights ─────────────────────────────────
-    if len(segs) < 3:
-        logger.warning(
-            f"[SCORER] Signal 1 — Only {len(segs)} transcript segment(s). "
-            "OpenAI needs a real transcript to find highlights. "
-            "This video may have no captions or Supadata returned a mock transcript."
-        )
-    from service.video_analyzer import analyze_segments
-    hl_data    = analyze_segments(segs, highlight_json, source_label="pipeline")
-    highlights = hl_data.get("highlights", [])
-    if not highlights:
-        logger.warning(
-            "[SCORER] Signal 1 returned 0 highlights — "
-            "transcript may be too short or OpenAI found nothing engaging. "
-            f"transcript_segments={len(segs)} source={transcript.source}"
-        )
+    highlights: list[dict] = []
+    if skip_signal1:
+        logger.info("[SCORER] Signal 1 — Skipped (no real transcript).")
     else:
-        logger.info(f"[SCORER] Signal 1 complete: {len(highlights)} highlights found.")
+        segs = _convert_transcript(transcript)
+        logger.info(f"[SCORER] Signal 1 — Semantic analysis | {len(segs)} segments ...")
+        if len(segs) < 3:
+            logger.warning(
+                f"[SCORER] Signal 1 — Only {len(segs)} transcript segment(s). "
+                "OpenAI needs a real transcript to find highlights. "
+                "This video may have no captions or Supadata returned a mock transcript."
+            )
+        from service.video_analyzer import analyze_segments
+        hl_data    = analyze_segments(segs, highlight_json, source_label="pipeline")
+        highlights = hl_data.get("highlights", [])
+        if not highlights:
+            logger.warning(
+                "[SCORER] Signal 1 returned 0 highlights — "
+                "transcript may be too short or OpenAI found nothing engaging. "
+                f"transcript_segments={len(segs)} source={transcript.source}"
+            )
+        else:
+            logger.info(f"[SCORER] Signal 1 complete: {len(highlights)} highlights found.")
 
     # ── Signal 2: Audio energy ───────────────────────────────────────────────
     logger.info(f"[SCORER] Signal 2 — Audio energy analysis | wav={audio_wav_path} ...")
@@ -224,20 +239,102 @@ def _multi_signal_score(
         f"audio_windows={len(audio_data.get('analysis_30s_windows', []))} | "
         f"dialogue={'yes' if dialogue_data else 'no (skipped/failed)'}"
     )
-    windows = _combine(highlights, audio_data, dialogue_data, video_duration)
+
+    if not highlights:
+        # No Signal 1 — score using audio (Signal 2 + 3) only
+        logger.info("[SCORER] No Signal 1 highlights — scoring with Signal 2+3 only.")
+        windows = _audio_only_score(audio_data, dialogue_data, video_duration, shorts_count)
+    else:
+        windows = _combine(highlights, audio_data, dialogue_data, video_duration)
 
     if not windows:
-        reason = (
-            "Signal 1 returned 0 highlights" if not highlights
-            else "all highlights were out of video range or too short"
-        )
-        logger.warning(
-            f"[SCORER] Multi-signal engine produced no windows ({reason}) — falling back to stub."
-        )
+        logger.warning("[SCORER] Multi-signal engine produced no windows — falling back to stub.")
         return _stub_score(transcript, video_duration, shorts_count)
 
     logger.info(f"[SCORER] Multi-signal scoring complete: {len(windows)} windows selected.")
     return windows
+
+
+def _audio_only_score(
+    audio_data: dict,
+    dialogue_data: dict | None,
+    video_duration: float,
+    shorts_count: int,
+) -> list[dict]:
+    """
+    Score windows using Signal 2 (audio energy) + Signal 3 (speaker turns) only.
+    Used when no transcript is available (Hindi videos, no captions, etc.).
+
+    Groups the 30s energy buckets into TARGET_DURATION-length candidate windows,
+    scores each by energy + dialogue density, then picks the top non-overlapping ones.
+    """
+    energy_windows = audio_data.get("analysis_30s_windows", [])
+    if not energy_windows:
+        return []
+
+    # Normalize energy scores 0-1
+    energies = [w["mean_energy_30s"] for w in energy_windows]
+    e_min, e_max = min(energies), max(energies)
+    def _norm_e(v: float) -> float:
+        return (v - e_min) / (e_max - e_min) if e_max > e_min else 0.5
+
+    # Build dialogue lookup (30s buckets)
+    dial_lookup: dict[float, float] = {}
+    if dialogue_data:
+        for w in dialogue_data.get("windows", []):
+            dial_lookup[float(w["start_seconds"])] = w["score"]
+
+    # Weights: energy 60%, dialogue 40% (no semantic signal)
+    W_E, W_D = 0.60, 0.40
+
+    # Build candidate windows of ~TARGET_DURATION by merging consecutive 30s buckets
+    buckets_per_clip = max(1, round(TARGET_DURATION / 30))
+    candidates: list[dict] = []
+
+    for i in range(len(energy_windows)):
+        end_i = min(i + buckets_per_clip, len(energy_windows))
+        chunk = energy_windows[i:end_i]
+
+        c_start = float(chunk[0]["window_start"])
+        c_end   = float(chunk[-1]["window_start"]) + 30.0
+        c_end   = min(c_end, video_duration)
+        dur     = c_end - c_start
+
+        if dur < MIN_DURATION:
+            continue
+
+        s_eng  = sum(_norm_e(b["mean_energy_30s"]) for b in chunk) / len(chunk)
+        s_dial = sum(dial_lookup.get(float(b["window_start"]), 0.0) for b in chunk) / len(chunk)
+        score  = W_E * s_eng + W_D * s_dial
+
+        candidates.append({
+            "start": round(c_start, 3),
+            "end":   round(c_end,   3),
+            "score": round(score, 4),
+            "hook":            "",
+            "engagement_type": "",
+            "reason":          "Audio energy + speaker activity (no transcript available)",
+            # Individual signal scores — used by hook_detector.py
+            "signal1":         0.0,
+            "signal2":         round(s_eng,  4),
+            "signal3":         round(s_dial, 4),
+        })
+
+    # Sort by score descending, pick non-overlapping
+    candidates.sort(key=lambda x: x["score"], reverse=True)
+    selected: list[dict] = []
+    used_ends: list[float] = []
+    for clip in candidates:
+        if not any(clip["start"] < end + 10 for end in used_ends):
+            selected.append(clip)
+            used_ends.append(clip["end"])
+            if len(selected) >= shorts_count:
+                break
+
+    # Return sorted by start time for a coherent timeline
+    selected.sort(key=lambda x: x["start"])
+    logger.info(f"[SCORER] Audio-only scoring complete: {len(selected)} windows selected.")
+    return selected
 
 
 def _combine(
@@ -315,6 +412,10 @@ def _combine(
             "hook":            h.get("hook", ""),
             "engagement_type": h.get("engagement_type", ""),
             "reason":          h.get("reason", ""),
+            # Individual signal scores — used by hook_detector.py
+            "signal1":         round(s_sem,  4),
+            "signal2":         round(s_eng,  4),
+            "signal3":         round(s_dial, 4),
         })
         logger.debug(
             f"[SCORER] Highlight {h['start_time']}-{h['end_time']} | "
@@ -431,6 +532,10 @@ def _stub_score(transcript: TranscriptResult, video_duration: float, shorts_coun
                 "hook":            "",
                 "engagement_type": "",
                 "reason":          "",
+                # Individual signal scores — used by hook_detector.py (all unknown in stub)
+                "signal1":         0.0,
+                "signal2":         0.0,
+                "signal3":         0.0,
             })
             logger.info(f"[SCORER] Stub window {i+1}: {start:.1f}s->{end:.1f}s ({duration:.1f}s)")
         else:

@@ -23,7 +23,20 @@
     </div>
   </nav>
 
+  <!-- ── Page Navigation ──────────────────────────────── -->
+  <div class="page-nav-wrap">
+    <div class="page-nav" id="page-nav">
+      <button class="page-nav-btn active" data-page="shorts">🎬 Shorts</button>
+      <button class="page-nav-btn" data-page="hooks">🪝 Hook Studio</button>
+    </div>
+  </div>
+
   <div class="page-wrap">
+
+    <!-- ══════════════════════════════════════════════════
+         SHORTS PAGE (default)
+    ══════════════════════════════════════════════════ -->
+    <div id="shorts-page">
 
     <!-- ── Hero ──────────────────────────────────────── -->
     <header class="hero">
@@ -223,6 +236,68 @@
       <div id="history-empty" class="history-empty">No jobs yet.</div>
       <div id="history-list" class="history-list"></div>
     </section>
+
+    </div><!-- /shorts-page -->
+
+    <!-- ══════════════════════════════════════════════════
+         HOOK STUDIO PAGE
+    ══════════════════════════════════════════════════ -->
+    <div id="hooks-page" class="hidden">
+
+      <header class="hero" style="margin-bottom:2rem">
+        <h1 style="font-size:2.8rem">🪝 <span class="grad">Hook Studio</span></h1>
+        <p>Pick a completed job, see its high-energy scenes, edit or generate AI hook scripts, and create polished hook clips instantly.</p>
+      </header>
+
+      <!-- Job picker -->
+      <section class="card" style="padding:1.8rem 2rem">
+        <div class="hs-picker-row">
+          <select id="hs-job-select" class="hs-select">
+            <option value="">— Select a completed job —</option>
+          </select>
+          <button class="btn-primary" id="hs-load-btn">Load Job ›</button>
+        </div>
+      </section>
+
+      <!-- Job context (hidden until loaded) -->
+      <div id="hs-workspace" class="hidden">
+
+        <!-- Video + custom timeline -->
+        <section class="card" style="padding:1.8rem 2rem;margin-bottom:1.5rem">
+          <div class="hs-job-title" id="hs-job-title"></div>
+          <div class="hs-job-meta" id="hs-job-meta"></div>
+
+          <div class="hs-media-row">
+            <!-- Video player -->
+            <div class="hs-video-wrap">
+              <video id="hs-video" controls playsinline style="width:100%;border-radius:12px;background:#000">
+                <source id="hs-video-src" src="" type="video/mp4">
+              </video>
+            </div>
+          </div>
+
+          <!-- Custom timeline strip -->
+          <div class="hs-timeline-label">Scene Overview — click a segment to jump to it</div>
+          <div class="hs-timeline" id="hs-timeline">
+            <div class="hs-tl-bg"></div>
+            <div class="hs-tl-segments" id="hs-tl-segments"></div>
+            <div class="hs-tl-playhead" id="hs-tl-playhead"></div>
+            <div class="hs-tl-time-start">0:00</div>
+            <div class="hs-tl-time-end" id="hs-tl-time-end">—</div>
+          </div>
+          <!-- Legend -->
+          <div class="hs-legend">
+            <span class="hs-legend-dot purple"></span> Scored window
+            <span class="hs-legend-dot red" style="margin-left:1.2rem"></span> Hook candidate (high energy, weak speech)
+          </div>
+        </section>
+
+        <!-- Window cards -->
+        <div id="hs-windows" class="hs-windows"></div>
+
+      </div><!-- /hs-workspace -->
+
+    </div><!-- /hooks-page -->
 
   </div><!-- /page-wrap -->
 

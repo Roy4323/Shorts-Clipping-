@@ -248,10 +248,7 @@ def _detect_regions_from_frame(frame_path: Path) -> list[Region]:
 
 
 def _region_selection_score(regions: list[Region]) -> tuple[int, int, int]:
-    """
-    Rank frames by how suitable they are for layout selection.
-    Higher tuple wins.
-    """
+    """Rank frames by how suitable they are for layout selection. Higher tuple wins."""
     face_count = sum(1 for region in regions if region.label == "face")
     has_screen = any(region.label == "screen" for region in regions)
     has_gameplay = any(region.label == "gameplay" for region in regions)

@@ -1,11 +1,12 @@
-"""Background task: full 6-stage pipeline.
+"""Background task: full pipeline.
 
 Stages
 ------
 1. Metadata + Classification               (5 %)
 2. Download / Upload + Transcript          (10 → 35 %)
 3. Multi-Signal Scoring (real or stub)     (35 → 45 %)
-4. Clip Cutting                            (45 → 60 %)
+4. Clip Cutting                            (45 → 55 %)
+4.5 Hook Processing (optional)            (55 → 60 %) — only when process_hooks=True
 5. Reframing 16:9 → 9:16                  (60 → 80 %)
 6. Subtitle Burn                           (80 → 100 %)
 """
@@ -20,6 +21,8 @@ from agents.vision_agent import detect_regions
 from api.models import (
     ClassificationResult,
     ClipResult,
+    HookCandidate,
+    HookClip,
     TranscriptResult,
     VideoMetadata,
 )
@@ -115,7 +118,8 @@ def _run_pipeline(job_id: str, url: str) -> None:
     payload = job_store.get(job_id)
     shorts_count: int = int(payload.get("shorts_count", 3))
     subtitle_preset: str = payload.get("subtitle_preset", "default")
-    logger.info(f"[PIPELINE] shorts_count={shorts_count} | subtitle_preset={subtitle_preset}")
+    process_hooks: bool = bool(payload.get("process_hooks", False))
+    logger.info(f"[PIPELINE] shorts_count={shorts_count} | subtitle_preset={subtitle_preset} | process_hooks={process_hooks}")
 
     if is_local:
         payload = job_store.get(job_id)
@@ -181,6 +185,20 @@ def _run_pipeline(job_id: str, url: str) -> None:
 
     logger.info(f"[PIPELINE] Transcript: source={transcript_result.source} | segments={len(transcript_result.segments)}")
 
+    # Whisper fallback: if Supadata returned a mock/empty result, try transcribing with Whisper
+    if transcript_result.source == "mock" or not transcript_result.segments:
+        if video_path:
+            logger.info("[PIPELINE] Primary transcript empty — attempting Whisper fallback.")
+            from pipeline.whisper_transcript import transcribe_with_whisper
+            whisper_result = transcribe_with_whisper(video_path)
+            if whisper_result and whisper_result.segments:
+                transcript_result = whisper_result
+                logger.info(f"[PIPELINE] Whisper transcript: {len(transcript_result.segments)} segments.")
+            else:
+                logger.warning("[PIPELINE] Whisper fallback also failed — will score with audio signals only.")
+        else:
+            logger.warning("[PIPELINE] No video path available for Whisper fallback.")
+
     transcript_dir = get_job_subdir(job_id, "transcripts")
     transcript_path = transcript_dir / "transcript.json"
     write_json(transcript_path, transcript_result.model_dump())
@@ -202,6 +220,7 @@ def _run_pipeline(job_id: str, url: str) -> None:
         audio_wav_path=audio_wav_path,
         shorts_count=shorts_count,
         subtitle_preset=subtitle_preset,
+        process_hooks=process_hooks,
     )
 
 
@@ -227,6 +246,7 @@ def regenerate_clips_task(job_id: str) -> None:
         
         shorts_count = int(payload.get("shorts_count", 3))
         subtitle_preset = payload.get("subtitle_preset", "default")
+        process_hooks = bool(payload.get("process_hooks", False))
 
         _run_clipping_pipeline(
             job_id, metadata, classification, transcript_result, video_path,
@@ -234,6 +254,7 @@ def regenerate_clips_task(job_id: str) -> None:
             audio_wav_path=regen_wav,
             shorts_count=shorts_count,
             subtitle_preset=subtitle_preset,
+            process_hooks=process_hooks,
         )
     except Exception as exc:
         logger.error(f"❌ Job {job_id} regeneration failed: {exc}", exc_info=True)
@@ -330,6 +351,115 @@ def rereframe_clips_task(job_id: str) -> None:
         raise
 
 
+def _run_hook_pipeline(
+    job_id: str,
+    windows: list[dict],
+    raw_clips: list[str],
+    transcript_result: TranscriptResult,
+    metadata: VideoMetadata,
+    start_offset: int,
+    existing_hook_clips: list[dict],
+    new_hook_clips: list[HookClip],
+) -> None:
+    """
+    Stage 4.5 — Run the full hook pipeline for each qualifying candidate window.
+
+    For each window that passes the hook detector threshold:
+      1. Generate a hook script via OpenAI gpt-4o-mini (hook_generator.py).
+      2. Synthesize TTS audio with word timestamps (tts_engine.py).
+      3. Trim the raw clip to TTS duration, swap audio (audio_replacer.py).
+      4. Burn TTS-based subtitles onto the hook clip (hook_subtitles.py).
+
+    If any step fails for a candidate the error is logged and that candidate is
+    skipped — the rest of the job continues normally.
+    """
+    from pipeline.hook_detector import detect_hook_candidates
+    from pipeline.hook_generator import generate_hook
+    from pipeline.tts_engine import synthesize_hook
+    from pipeline.audio_replacer import replace_audio
+    from pipeline.hook_subtitles import burn_hook_subtitles
+
+    hook_dir = get_job_subdir(job_id, "hooks")
+
+    candidates: list[HookCandidate] = detect_hook_candidates(windows, transcript_result)
+    if not candidates:
+        logger.info("[HOOK] No hook candidates found — skipping hook processing.")
+        _set(job_id, hook_candidates=[])
+        return
+
+    _set(job_id, hook_candidates=[c.model_dump() for c in candidates])
+    logger.info(f"[HOOK] Processing {len(candidates)} hook candidate(s).")
+
+    hook_clip_offset = len(existing_hook_clips)
+
+    for i, candidate in enumerate(candidates, 1):
+        hook_n = hook_clip_offset + i
+        # The raw clip index is candidate.window_index + start_offset + 1 (1-based file naming)
+        clip_file_n = start_offset + candidate.window_index + 1
+        raw_clip = Path(raw_clips[candidate.window_index]) if candidate.window_index < len(raw_clips) else None
+
+        if raw_clip is None or not raw_clip.exists():
+            logger.warning(f"[HOOK] Candidate {i}: raw clip not found (index={candidate.window_index}) — skipping.")
+            continue
+
+        logger.info(
+            f"[HOOK] Candidate {i}/{len(candidates)} | "
+            f"clip={raw_clip.name} | {candidate.start:.1f}-{candidate.end:.1f}s"
+        )
+
+        try:
+            # Step 1 — Generate hook script (content-type-aware)
+            hook_data = generate_hook(
+                video_title=metadata.title,
+                video_description=metadata.description,
+                weak_transcript=candidate.weak_transcript,
+                signal_reason=candidate.engagement_type or "high audio energy with weak speech",
+                content_type=classification.content_type,
+            )
+            hook_text = hook_data["hook"]
+            hook_type = hook_data.get("hook_type", "statement")
+
+            # Step 2 — TTS synthesis
+            tts_audio_path = hook_dir / f"hook_audio_{hook_n:02d}.mp3"
+            word_timestamps = synthesize_hook(hook_text, str(tts_audio_path))
+            tts_duration = word_timestamps[-1]["end"] if word_timestamps else hook_data.get("duration_estimate_sec", 12)
+
+            # Step 3 — Audio replacement
+            hook_raw_path = hook_dir / f"hook_raw_{hook_n:02d}.mp4"
+            replace_audio(str(raw_clip), str(tts_audio_path), str(hook_raw_path))
+
+            # Step 4 — Burn hook subtitles
+            hook_final_path = hook_dir / f"hook_final_{hook_n:02d}.mp4"
+            burn_hook_subtitles(str(hook_raw_path), word_timestamps, str(hook_final_path))
+
+            # Record result
+            new_hook_clips.append(
+                HookClip(
+                    clip_number=hook_n,
+                    hook_text=hook_text,
+                    hook_type=hook_type,
+                    start_sec=candidate.start,
+                    end_sec=candidate.end,
+                    duration=round(float(tts_duration), 2),
+                    voice="en-US-GuyNeural",
+                    download_url=f"/api/hook/{job_id}/{hook_n}",
+                )
+            )
+            logger.info(f"[HOOK] Candidate {i} complete: hook_final_{hook_n:02d}.mp4")
+
+        except Exception as exc:
+            logger.error(
+                f"[HOOK] Candidate {i} failed — skipping. Error: {exc}",
+                exc_info=True,
+            )
+            # Never fail the whole job; continue to next candidate
+
+    logger.info(
+        f"[HOOK] Stage 4.5 complete: {len(new_hook_clips)}/{len(candidates)} "
+        "hook clips generated."
+    )
+
+
 def _run_clipping_pipeline(
     job_id: str,
     metadata: VideoMetadata,
@@ -341,8 +471,10 @@ def _run_clipping_pipeline(
     audio_wav_path: str | None = None,
     shorts_count: int = 3,
     subtitle_preset: str = "default",
+    process_hooks: bool = False,
 ) -> None:
-    """Executes Pipeline Stages 3 through 6. Appends to existing clips if provided."""
+    """Executes Pipeline Stages 3 through 6 (+ optional 4.5 hook processing).
+    Appends to existing clips if provided."""
 
     if existing_clips is None:
         existing_clips = []
@@ -385,6 +517,28 @@ def _run_clipping_pipeline(
     clips_dir = get_job_subdir(job_id, "clips")
     raw_clips = cut_clips(video_path, windows, clips_dir, start_offset=start_offset)
     logger.info(f"[PIPELINE] Stage 4 complete: {len(raw_clips)} raw clips in {clips_dir}")
+
+    # ------------------------------------------------------------------
+    # Stage 4.5 — Hook Processing (optional, process_hooks=True only)
+    # ------------------------------------------------------------------
+    existing_hook_clips: list[dict] = job_store.get(job_id).get("hook_clips", [])
+    new_hook_clips: list[HookClip] = []
+
+    if process_hooks:
+        logger.info("[PIPELINE] Stage 4.5 — Hook Processing")
+        _set(job_id, stage="hook_processing", progress_pct=55)
+        _run_hook_pipeline(
+            job_id=job_id,
+            windows=windows,
+            raw_clips=raw_clips,
+            transcript_result=transcript_result,
+            metadata=metadata,
+            start_offset=start_offset,
+            existing_hook_clips=existing_hook_clips,
+            new_hook_clips=new_hook_clips,
+        )
+    else:
+        logger.info("[PIPELINE] Stage 4.5 — Hook Processing skipped (process_hooks=False)")
 
     # ------------------------------------------------------------------
     # Stage 5 — Reframing
@@ -459,6 +613,7 @@ def _run_clipping_pipeline(
 
     # Combine with existing
     final_clips = existing_clips + [c.model_dump() for c in new_clip_results]
+    final_hook_clips = existing_hook_clips + [c.model_dump() for c in new_hook_clips]
 
     # ------------------------------------------------------------------
     # Done
@@ -468,6 +623,7 @@ def _run_clipping_pipeline(
         stage="done",
         progress_pct=100,
         clips=final_clips,
+        hook_clips=final_hook_clips,
     )
     logger.info(f"[PIPELINE] {'='*60}")
     logger.info(f"[PIPELINE] Job {job_id} COMPLETE — {len(final_clips)} total clips ready.")

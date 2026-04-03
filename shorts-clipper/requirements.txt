@@ -17,3 +17,7 @@ soundfile>=0.12.1
 pyannote.audio>=3.3.0
 torch>=2.0.0
 python-dotenv>=1.0.0
+# AI Hook Generator
+edge-tts>=6.1.9
+# CTA Bumper — frame rendering
+Pillow>=10.0.0

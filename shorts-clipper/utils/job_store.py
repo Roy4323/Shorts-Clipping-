@@ -1,5 +1,6 @@
 import json
 from datetime import UTC, datetime
+from pathlib import Path
 from threading import Lock
 from typing import Any
 
@@ -10,8 +11,17 @@ from config import settings
 
 
 class JobStore:
+    """
+    Job state store with three backends (in priority order):
+      1. Redis (if REDIS_URL is set and reachable)
+      2. Disk-backed in-memory dict (default) — persists to
+         {JOBS_DIR}/{job_id}/job_state.json so jobs survive restarts
+    """
+
+    _STATE_FILE = "job_state.json"
+
     def __init__(self) -> None:
-        self._lock = Lock()
+        self._lock  = Lock()
         self._memory: dict[str, dict[str, Any]] = {}
         self._redis: Redis | None = None
 
@@ -22,8 +32,48 @@ class JobStore:
             except RedisError:
                 self._redis = None
 
+        # Pre-load all persisted jobs from disk when Redis is unavailable
+        if self._redis is None:
+            self._load_from_disk()
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
     def _key(self, job_id: str) -> str:
         return f"shorts:job:{job_id}"
+
+    def _state_path(self, job_id: str) -> Path:
+        return Path(settings.jobs_dir) / job_id / self._STATE_FILE
+
+    def _persist(self, job_id: str, payload: dict[str, Any]) -> None:
+        """Write payload to {JOBS_DIR}/{job_id}/job_state.json."""
+        path = self._state_path(job_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+        except OSError:
+            pass  # non-fatal — memory copy still works
+
+    def _load_from_disk(self) -> None:
+        """Scan JOBS_DIR for job_state.json files and warm the memory cache."""
+        jobs_dir = Path(settings.jobs_dir)
+        if not jobs_dir.exists():
+            return
+        loaded = 0
+        for state_file in jobs_dir.glob(f"*/{self._STATE_FILE}"):
+            try:
+                payload = json.loads(state_file.read_text(encoding="utf-8"))
+                job_id = payload.get("job_id")
+                if job_id:
+                    self._memory[job_id] = payload
+                    loaded += 1
+            except (OSError, json.JSONDecodeError):
+                continue
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
 
     def create(self, job_id: str, payload: dict[str, Any]) -> None:
         now = datetime.now(UTC).isoformat()
@@ -44,6 +94,7 @@ class JobStore:
 
         with self._lock:
             self._memory[job_id] = payload
+        self._persist(job_id, payload)
 
     def get(self, job_id: str) -> dict[str, Any] | None:
         if self._redis is not None:

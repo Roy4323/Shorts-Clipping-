@@ -223,18 +223,41 @@ def _interpolate_crop_x(
 # ---------------------------------------------------------------------------
 
 def _run_ffmpeg_crop(input_path: str, output_path: str, vf_string: str) -> None:
-    """Run FFmpeg with a -vf filter string."""
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", str(input_path),
-        "-vf", vf_string,
-        "-c:v", "libx264", "-crf", "23", "-preset", "fast",
-        "-c:a", "copy",
-        str(output_path),
-    ]
+    """
+    Apply a filter chain to ensure the media fills the entire vertical canvas.
+
+    Uses -filter_complex for multi-input graphs (screenshare, gameplay, split
+    layouts that reference [0:v] multiple times), and -vf for simple single-chain
+    filters (fill / face-center crop).
+    """
+    is_complex = "[0:v]" in vf_string
+
+    if is_complex:
+        # Append a named output label so we can map it explicitly
+        fc_string = vf_string + "[vout]"
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", str(input_path),
+            "-filter_complex", fc_string,
+            "-map", "[vout]",
+            "-map", "0:a?",
+            "-c:v", "libx264", "-crf", "23", "-preset", "fast",
+            "-c:a", "copy",
+            str(output_path),
+        ]
+    else:
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", str(input_path),
+            "-vf", vf_string,
+            "-c:v", "libx264", "-crf", "23", "-preset", "fast",
+            "-c:a", "copy",
+            str(output_path),
+        ]
+
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
-        raise ReframerError(f"FFmpeg crop failed:\n{result.stderr[-600:]}")
+        raise ReframerError(f"FFmpeg crop failed: {result.stderr[-600:]}")
 
 
 def _run_ffmpeg_dynamic_crop(

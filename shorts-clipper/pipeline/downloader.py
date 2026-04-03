@@ -9,6 +9,29 @@ from api.models import VideoMetadata
 from utils.logger import logger
 
 
+def _ffmpeg_location() -> str | None:
+    """Return the directory containing ffmpeg.exe for yt-dlp, or None to auto-detect."""
+    import shutil
+    if shutil.which("ffmpeg"):
+        return None  # yt-dlp will find it automatically
+
+    # static_ffmpeg bundles a properly-named ffmpeg.exe
+    try:
+        import static_ffmpeg
+        static_ffmpeg.add_paths()
+        if shutil.which("ffmpeg"):
+            return None  # now in PATH
+    except Exception:
+        pass
+
+    # Fall back to conda Library/bin which also has a proper ffmpeg.exe
+    conda_ffmpeg = Path(__file__).parents[3] / "Library" / "bin" / "ffmpeg.exe"
+    if conda_ffmpeg.exists():
+        return str(conda_ffmpeg.parent)
+
+    return None
+
+
 class DownloaderError(RuntimeError):
     pass
 
@@ -39,6 +62,7 @@ def _extract_info(url: str, *, download: bool, outtmpl: str | None = None) -> di
         logger.warning("⚠️ No cookies.txt found in project root!")
         cookiefile = None
 
+    ffmpeg_loc = _ffmpeg_location()
     ydl_opts: dict[str, Any] = {
         "quiet": True,
         "no_warnings": True,
@@ -50,6 +74,7 @@ def _extract_info(url: str, *, download: bool, outtmpl: str | None = None) -> di
         "js_runtimes": {"node": {}},
         # Download the official EJS challenge-solver script from GitHub.
         "remote_components": ["ejs:github"],
+        **({"ffmpeg_location": ffmpeg_loc} if ffmpeg_loc else {}),
     }
 
     if download:
@@ -91,6 +116,7 @@ def get_metadata(url: str) -> VideoMetadata:
             "thumbnail": info.get("thumbnail"),
             "webpage_url": info.get("webpage_url") or url,
             "auto_caption_available": bool(automatic_captions or subtitles),
+            "channel_follower_count": info.get("channel_follower_count"),
         }
     except Exception as e:
         logger.warning(f"⚠️ Metadata extraction failed: {e}. Switching to fallback...")
@@ -136,12 +162,23 @@ def download_video_via_proxy(url: str, output_dir: Path) -> str:
             resp.raise_for_status()
             res_data = resp.json()
 
-            media_items = res_data.get("api", {}).get("media", [])
+            media_items = res_data.get("api", {}).get("mediaItems", [])
             if not media_items:
                 raise RuntimeError(f"Proxy returned no media items: {res_data}")
 
-            # Prefer 720p
-            target = next((m for m in media_items if m.get("mediaQuality") == "720p"), media_items[0])
+            # Keep only downloadable video items (skip audio-only and merge tasks that need ffmpeg)
+            video_items = [
+                m for m in media_items
+                if m.get("type") == "Video" and m.get("mediaTask") == "download"
+            ]
+            # Fallback: accept merge-task videos if no direct-download ones exist
+            if not video_items:
+                video_items = [m for m in media_items if m.get("type") == "Video"]
+            if not video_items:
+                raise RuntimeError("Proxy returned no video items.")
+
+            # Prefer HD, fall back to first available
+            target = next((m for m in video_items if m.get("mediaQuality") == "HD"), video_items[0])
             direct_url = target.get("mediaUrl")
             
             if not direct_url:
@@ -202,7 +239,8 @@ def download_video(url: str, output_dir: Path) -> str:
 
     except Exception as exc:
         logger.warning(f"⚠️ Primary download (yt-dlp) failed: {exc}")
-        if "bot" in str(exc).lower() or "empty" in str(exc).lower() or "no file" in str(exc).lower():
+        exc_str = str(exc).lower()
+        if any(kw in exc_str for kw in ("bot", "empty", "no file", "ffmpeg", "merging")):
             logger.info("⚡ Switching to PROXY download fallback...")
             return download_video_via_proxy(url, output_dir)
         raise

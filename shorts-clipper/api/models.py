@@ -9,6 +9,7 @@ JobStage = Literal[
     "transcribing",
     "scoring",
     "clipping",
+    "hook_processing",
     "reframing",
     "subtitles",
     "done",
@@ -42,10 +43,53 @@ class Region(BaseModel):
     score: float = 1.0
 
 
+class HookCandidate(BaseModel):
+    window_index: int          # 0-based index into the scored windows list
+    start: float
+    end: float
+    signal1: float = 0.0      # semantic score (weak by definition for hook candidates)
+    signal2: float = 0.0      # audio energy score
+    signal3: float = 0.0      # speaker-turn density score
+    weak_transcript: str = "" # spoken text from the window (to be replaced)
+    engagement_type: str = "" # from Signal 1 (may be empty)
+
+
+class HookClip(BaseModel):
+    clip_number: int           # sequential, starts after regular short clips
+    hook_text: str             # generated hook script
+    hook_type: str = ""        # question | statement | fact
+    start_sec: float
+    end_sec: float
+    duration: float
+    voice: str = ""
+    download_url: str
+
+
+class CTAConfig(BaseModel):
+    enabled: bool = False
+    channel_name: str = ""
+    subscriber_count: str = "0"
+    logo_id: str | None = None   # UUID token → data/uploads/cta_logos/{logo_id}.*
+    accent_color: str = "#CC0000"
+
+
 class JobRequest(BaseModel):
     url: HttpUrl
     shorts_count: int = Field(default=3, ge=1, le=10)
     subtitle_preset: str = Field(default="default")
+    process_hooks: bool = Field(default=False)
+    cta_config: CTAConfig | None = None
+
+
+class HookSuggestRequest(BaseModel):
+    window_index: int = Field(..., ge=0)
+    content_type: str = Field(default="general")
+
+
+class HookGenerateRequest(BaseModel):
+    window_index: int = Field(..., ge=0)
+    hook_text: str = Field(..., min_length=5)
+    voice: str = Field(default="en-US-GuyNeural")
 
 
 class HealthResponse(BaseModel):
@@ -64,6 +108,7 @@ class VideoMetadata(BaseModel):
     thumbnail: str | None = None
     webpage_url: str
     auto_caption_available: bool = False
+    channel_follower_count: int | None = None   # from yt-dlp, no API key needed
 
 
 class ClassificationResult(BaseModel):
@@ -93,6 +138,12 @@ class ScoredWindow(BaseModel):
     start: float
     end: float
     score: float
+    signal1: float = 0.0   # semantic score
+    signal2: float = 0.0   # audio energy score
+    signal3: float = 0.0   # speaker-turn density score
+    hook: str = ""
+    engagement_type: str = ""
+    reason: str = ""
 
 
 class ClipResult(BaseModel):
@@ -123,6 +174,8 @@ class JobStatus(BaseModel):
     artifacts: StageTwoArtifacts | None = None
     windows: list[ScoredWindow] = Field(default_factory=list)
     clips: list[ClipResult] = Field(default_factory=list)
+    hook_candidates: list[HookCandidate] = Field(default_factory=list)
+    hook_clips: list[HookClip] = Field(default_factory=list)
     error_message: str | None = None
     scorer_warning: str | None = None
 
