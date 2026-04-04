@@ -613,18 +613,29 @@ def add_cta_to_hook_clip(job_id: str, n: int, cta: CTAConfig) -> dict:
     try:
         from pipeline.cta_bumper import generate_cta_bumper, append_cta_to_clip as _concat
 
+        size_before = clip_file.stat().st_size
+        logger.info(f"[CTA] hook clip {n} size BEFORE: {size_before} bytes — {clip_file}")
+
         bumper_path = generate_cta_bumper(
             channel_name=cta.channel_name,
             subscriber_count=cta.subscriber_count,
             logo_path=str(logo_path) if logo_path else None,
             accent_color=cta.accent_color,
         )
+        logger.info(f"[CTA] hook bumper generated: {bumper_path}")
         _concat(str(orig_file), bumper_path, str(tmp_out))
+        logger.info(f"[CTA] hook concat done — tmp_out size: {tmp_out.stat().st_size} bytes")
+
         import os as _os
         _os.replace(str(tmp_out), str(clip_file))
+
+        size_after = clip_file.stat().st_size
+        logger.info(f"[CTA] hook clip {n} size AFTER replace: {size_after} bytes — delta: {size_after - size_before}")
+
         return {"status": "ok", "clip_number": n}
 
     except Exception as exc:
+        logger.error(f"[CTA] hook clip {n} failed: {exc}", exc_info=True)
         if tmp_out.exists():
             tmp_out.unlink(missing_ok=True)
         raise HTTPException(status_code=500, detail=str(exc))

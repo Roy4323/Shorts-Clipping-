@@ -600,7 +600,7 @@ def append_cta_to_clip(clip_path: str, bumper_path: str, output_path: str) -> st
 
     if result.returncode != 0:
         raise RuntimeError(
-            f"[CTA] ffmpeg concat filter failed:\n{result.stderr.decode(errors='replace')[:800]}"
+            f"[CTA] ffmpeg concat filter failed:\n{result.stderr.decode(errors='replace')}"
         )
     return str(output_path)
 
