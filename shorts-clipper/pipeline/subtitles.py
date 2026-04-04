@@ -98,7 +98,7 @@ def _build_srt(transcript: TranscriptResult, clip_start: float, clip_end: float,
 
 PRESET_STYLES = {
     "default": (
-        "FontName=Arial,FontSize=20,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,"
+        "FontName=Arial,FontSize=14,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,"
         "BackColour=&H80000000,Bold=1,Outline=1,Shadow=0.5,Alignment=2,MarginV=25"
     ),
     "karaoke": (

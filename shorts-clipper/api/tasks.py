@@ -371,6 +371,95 @@ def _run_hook_pipeline(
     )
 
 
+def rereframe_clips_task(job_id: str) -> None:
+    """Re-run only Stage 5 (reframe) + Stage 6 (subtitles) on existing raw clips."""
+    logger.info(f"🔄 Job {job_id} RE-REFRAME started.")
+    try:
+        payload = job_store.get(job_id)
+        if not payload:
+            raise ValueError("Job not found.")
+
+        classification = ClassificationResult(**payload["classification"])
+        transcript_result = TranscriptResult(**payload["transcript"])
+        windows = payload.get("windows", [])
+        subtitle_preset = payload.get("subtitle_preset", "default")
+
+        clips_dir = get_job_subdir(job_id, "clips")
+        reframed_dir = get_job_subdir(job_id, "reframed")
+        final_dir = get_job_subdir(job_id, "final")
+
+        # Find existing raw clips
+        raw_clips = sorted(clips_dir.glob("clip_*.mp4"))
+        if not raw_clips:
+            raise ValueError("No raw clips found to re-reframe.")
+
+        # Match windows to clips
+        if len(windows) < len(raw_clips):
+            raise ValueError(f"Window count ({len(windows)}) < clip count ({len(raw_clips)})")
+
+        logger.info(f"[PIPELINE] Re-reframing {len(raw_clips)} clips")
+        _set(job_id, stage="reframing", progress_pct=60, error_message=None)
+
+        # Stage 5 — Reframe
+        reframed_clips: list[dict] = []
+        for i, clip_path in enumerate(raw_clips, 1):
+            logger.info(f"[PIPELINE] Re-reframing clip {i}/{len(raw_clips)}: {clip_path.name}")
+            regions = detect_regions(str(clip_path))
+            out = reframed_dir / f"reframed_{i:02d}.mp4"
+            reframed_path, layout_type = reframe_clip(
+                str(clip_path), out, classification.content_type, regions=regions,
+            )
+            reframed_clips.append({
+                "path": reframed_path,
+                "layout": layout_type,
+                "regions": regions,
+            })
+            pct = 60 + int(i / len(raw_clips) * 20)
+            _set(job_id, progress_pct=pct)
+
+        # Stage 6 — Subtitle Burn
+        logger.info(f"[PIPELINE] Re-burning subtitles for {len(reframed_clips)} clips")
+        _set(job_id, stage="subtitles", progress_pct=80)
+
+        new_clip_results: list[ClipResult] = []
+        for i, (rc, window) in enumerate(zip(reframed_clips, windows), 1):
+            logger.info(f"[PIPELINE] Burning subtitles for clip {i}/{len(reframed_clips)}")
+            out = final_dir / f"short_{i:02d}.mp4"
+            burn_subtitles(
+                rc["path"], transcript_result,
+                window["start"], window["end"],
+                out, preset=subtitle_preset,
+            )
+            new_clip_results.append(
+                ClipResult(
+                    clip_number=i,
+                    start_sec=window["start"],
+                    end_sec=window["end"],
+                    score=window["score"],
+                    download_url=f"/api/clip/{job_id}/{i}",
+                    hook=window.get("hook", ""),
+                    engagement_type=window.get("engagement_type", ""),
+                    reason=window.get("reason", ""),
+                    layout=rc["layout"],
+                    regions=rc["regions"],
+                )
+            )
+            pct = 80 + int(i / len(reframed_clips) * 18)
+            _set(job_id, progress_pct=pct)
+
+        _set(
+            job_id,
+            stage="done",
+            progress_pct=100,
+            clips=[c.model_dump() for c in new_clip_results],
+        )
+        logger.info(f"[PIPELINE] Re-reframe COMPLETE — {len(new_clip_results)} clips ready.")
+    except Exception as exc:
+        logger.error(f"❌ Job {job_id} re-reframe failed: {exc}", exc_info=True)
+        _set(job_id, stage="failed", progress_pct=0, error_message=f"Re-reframe failed: {exc}")
+        raise
+
+
 def _run_clipping_pipeline(
     job_id: str,
     metadata: VideoMetadata,

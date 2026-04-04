@@ -181,6 +181,21 @@ def regenerate_job(job_id: str, background_tasks: BackgroundTasks):
     return ProcessResponse(job_id=job_id, stage="queued", progress_pct=0)
 
 
+@app.post("/api/generate/{job_id}/rereframe", response_model=ProcessResponse)
+def rereframe_job(job_id: str, background_tasks: BackgroundTasks):
+    """Re-run only reframing + subtitles on existing raw clips (Stage 5+6)."""
+    from api.tasks import rereframe_clips_task
+
+    payload = job_store.get(job_id)
+    if not payload:
+        raise HTTPException(404, "Job not found")
+    if not payload.get("windows"):
+        raise HTTPException(400, "Cannot re-reframe: no clips/windows found")
+
+    background_tasks.add_task(rereframe_clips_task, job_id)
+    return ProcessResponse(job_id=job_id, stage="queued", progress_pct=0)
+
+
 # ---------------------------------------------------------------------------
 # Status / Result polling
 # ---------------------------------------------------------------------------

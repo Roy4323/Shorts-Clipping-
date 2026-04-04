@@ -241,8 +241,9 @@
       c.classList.toggle('active-view', c.dataset.jobId === jobId);
     });
 
-    // Show/hide regenerate button
+    // Show/hide regenerate + re-reframe buttons
     $('regenerate-btn').style.display = job.transcript ? 'block' : 'none';
+    $('rereframe-btn').style.display = (job.windows && job.windows.length) ? 'block' : 'none';
     $('detail-progress').classList.add('hidden');
   }
 
@@ -762,6 +763,31 @@
       pollActive(viewJobId);
     } catch (e) {
       toast('Regeneration failed: ' + e.message);
+    }
+  };
+
+  window.rereframeActiveJob = async function() {
+    if (!viewJobId) return;
+    try {
+      const res = await fetch(`/api/generate/${viewJobId}/rereframe`, { method: 'POST' });
+      if (!res.ok) {
+        toast('Error: ' + (await res.text()));
+        return;
+      }
+      toast('Re-reframe started! Re-processing reframe + subtitles...');
+
+      $('rereframe-btn').classList.add('hidden');
+      $('regenerate-btn').classList.add('hidden');
+      $('detail-progress').classList.remove('hidden');
+      $('detail-progress-pct').textContent = '60%';
+      $('detail-progress-fill').style.width = '60%';
+
+      localStorage.setItem(LS_KEY, viewJobId);
+      clearInterval(pollTimer);
+      pollTimer = setInterval(() => pollActive(viewJobId), 2000);
+      pollActive(viewJobId);
+    } catch (e) {
+      toast('Re-reframe failed: ' + e.message);
     }
   };
 
