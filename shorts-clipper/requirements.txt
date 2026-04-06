@@ -9,7 +9,7 @@ yt-dlp>=2024.3.10
 httpx>=0.26.0
 certifi>=2024.2.2
 opencv-python-headless>=4.9.0.80
-mediapipe>=0.10.11
+mediapipe==0.10.14
 # Stage 3 — Multi-Signal Scoring Engine
 openai>=1.30.0
 librosa>=0.10.0

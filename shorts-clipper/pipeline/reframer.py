@@ -21,10 +21,12 @@ try:
     import cv2
     import mediapipe as mp
 
+    # Verify legacy solutions API exists (removed in mediapipe >= 0.10.21)
+    _mp_face_detection = mp.solutions.face_detection
     _MEDIAPIPE_OK = True
-except ImportError:
+except (ImportError, AttributeError):
     _MEDIAPIPE_OK = False
-    logger.warning("mediapipe/opencv not installed — reframer will use static crop fallback.")
+    logger.warning("mediapipe/opencv not installed or incompatible version — reframer will use static crop fallback.")
 
 # Output canvas
 _OUT_W = 1080
@@ -91,7 +93,7 @@ def _track_face_positions(clip_path: str, src_width: int) -> list[tuple[float, f
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
     sample_step = max(1, int(fps * _TRACK_SAMPLE_INTERVAL_SEC))
 
-    face_detector = mp.solutions.face_detection.FaceDetection(
+    face_detector = _mp_face_detection.FaceDetection(
         model_selection=1, min_detection_confidence=0.4
     )
 

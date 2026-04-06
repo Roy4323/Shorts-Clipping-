@@ -125,7 +125,7 @@ PRESET_STYLES = {
 
 
 def _process_karaoke(text: str) -> str:
-    """Add ASS karaoke highlight tags {\k} to each word."""
+    r"""Add ASS karaoke highlight tags {\k} to each word."""
     words = text.split()
     if not words:
         return text
